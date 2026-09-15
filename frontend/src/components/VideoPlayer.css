@@ -1,0 +1,40 @@
+.video-player {
+  width: 100%;
+  background: #000;
+  border-radius: var(--radius);
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+}
+
+.video-player video {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.video-locked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  aspect-ratio: 16 / 9;
+  gap: 1rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.video-locked .lock-icon {
+  font-size: 3rem;
+}
+
+.video-locked h3 {
+  font-size: 1.25rem;
+}
+
+.video-locked p {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}

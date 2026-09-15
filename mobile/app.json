@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "Udemy",
+    "slug": "udemy-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#5624d0"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.edulearn.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#5624d0"
+      },
+      "package": "com.edulearn.mobile",
+      "permissions": ["INTERNET"]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

@@ -1,0 +1,292 @@
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import api from '../services/api';
+
+export default function TeacherDashboard() {
+  const [data, setData] = useState(null);
+  const [liveClasses, setLiveClasses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(null);
+  const [form, setForm] = useState({ title: '', description: '', thumbnail: '' });
+  const [liveForm, setLiveForm] = useState({
+    courseId: '',
+    title: '',
+    description: '',
+    scheduledAt: '',
+    meetingUrl: '',
+    liveStreamId: '',
+    isPremium: false,
+  });
+  const [endForm, setEndForm] = useState({ id: null, recordingUrl: '' });
+
+  const fetchData = () => {
+    Promise.all([
+      api.get('/dashboard/teacher'),
+      api.get('/live-classes'),
+    ])
+      .then(([dashRes, liveRes]) => {
+        setData(dashRes.data.data);
+        setLiveClasses(liveRes.data.data);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { fetchData(); }, []);
+
+  const handleCreateCourse = async (e) => {
+    e.preventDefault();
+    try {
+      await api.post('/courses', { ...form, isPublished: true });
+      setShowForm(null);
+      setForm({ title: '', description: '', thumbnail: '' });
+      fetchData();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to create course');
+    }
+  };
+
+  const handleCreateLiveClass = async (e) => {
+    e.preventDefault();
+    try {
+      await api.post('/live-classes', {
+        ...liveForm,
+        isPremium: liveForm.isPremium,
+      });
+      setShowForm(null);
+      setLiveForm({
+        courseId: '',
+        title: '',
+        description: '',
+        scheduledAt: '',
+        meetingUrl: '',
+        liveStreamId: '',
+        isPremium: false,
+      });
+      fetchData();
+      alert('Live class scheduled!');
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to schedule class');
+    }
+  };
+
+  const handleStartClass = async (id) => {
+    try {
+      await api.post(`/live-classes/${id}/start`);
+      fetchData();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to start class');
+    }
+  };
+
+  const handleEndClass = async (e) => {
+    e.preventDefault();
+    try {
+      await api.post(`/live-classes/${endForm.id}/end`, {
+        recordingUrl: endForm.recordingUrl || undefined,
+      });
+      setEndForm({ id: null, recordingUrl: '' });
+      fetchData();
+      alert('Live class ended!');
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to end class');
+    }
+  };
+
+  if (loading) return <div className="loading container">Loading...</div>;
+
+  const { stats, courses } = data;
+
+  return (
+    <div className="container">
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h1>Teacher Dashboard</h1>
+          <p>Manage your courses and live classes</p>
+        </div>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button onClick={() => setShowForm(showForm === 'course' ? null : 'course')} className="btn btn-primary btn-sm">
+            + New Course
+          </button>
+          <button onClick={() => setShowForm(showForm === 'live' ? null : 'live')} className="btn btn-secondary btn-sm">
+            + Schedule Live Class
+          </button>
+        </div>
+      </div>
+
+      {showForm === 'course' && (
+        <div className="card" style={{ marginBottom: '2rem' }}>
+          <h3 style={{ marginBottom: '1rem' }}>Create Course</h3>
+          <form onSubmit={handleCreateCourse}>
+            <div className="form-group">
+              <label>Title</label>
+              <input className="form-control" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
+            </div>
+            <div className="form-group">
+              <label>Description</label>
+              <textarea className="form-control" rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
+            </div>
+            <div className="form-group">
+              <label>Thumbnail URL</label>
+              <input className="form-control" value={form.thumbnail} onChange={(e) => setForm({ ...form, thumbnail: e.target.value })} />
+            </div>
+            <button type="submit" className="btn btn-primary">Create Course</button>
+          </form>
+        </div>
+      )}
+
+      {showForm === 'live' && (
+        <div className="card" style={{ marginBottom: '2rem' }}>
+          <h3 style={{ marginBottom: '1rem' }}>Schedule Live Class</h3>
+          <form onSubmit={handleCreateLiveClass}>
+            <div className="form-group">
+              <label>Course</label>
+              <select className="form-control" value={liveForm.courseId} onChange={(e) => setLiveForm({ ...liveForm, courseId: e.target.value })} required>
+                <option value="">Select course</option>
+                {courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Title</label>
+              <input className="form-control" value={liveForm.title} onChange={(e) => setLiveForm({ ...liveForm, title: e.target.value })} required />
+            </div>
+            <div className="form-group">
+              <label>Description</label>
+              <textarea className="form-control" rows={2} value={liveForm.description} onChange={(e) => setLiveForm({ ...liveForm, description: e.target.value })} />
+            </div>
+            <div className="form-group">
+              <label>Scheduled At</label>
+              <input type="datetime-local" className="form-control" value={liveForm.scheduledAt} onChange={(e) => setLiveForm({ ...liveForm, scheduledAt: e.target.value })} required />
+            </div>
+            <div className="form-group">
+              <label>Meeting URL</label>
+              <input className="form-control" value={liveForm.meetingUrl} onChange={(e) => setLiveForm({ ...liveForm, meetingUrl: e.target.value })} placeholder="https://meet.google.com/..." />
+            </div>
+            <div className="form-group">
+              <label>Live Stream ID (external)</label>
+              <input className="form-control" value={liveForm.liveStreamId} onChange={(e) => setLiveForm({ ...liveForm, liveStreamId: e.target.value })} placeholder="stream-abc123" />
+            </div>
+            <div className="form-group">
+              <label>
+                <input type="checkbox" checked={liveForm.isPremium} onChange={(e) => setLiveForm({ ...liveForm, isPremium: e.target.checked })} />
+                {' '}Premium class (requires subscription)
+              </label>
+            </div>
+            <button type="submit" className="btn btn-primary">Schedule Class</button>
+          </form>
+        </div>
+      )}
+
+      {endForm.id && (
+        <div className="card" style={{ marginBottom: '2rem' }}>
+          <h3 style={{ marginBottom: '1rem' }}>End Live Class</h3>
+          <form onSubmit={handleEndClass}>
+            <div className="form-group">
+              <label>Recording URL (optional)</label>
+              <input
+                className="form-control"
+                value={endForm.recordingUrl}
+                onChange={(e) => setEndForm({ ...endForm, recordingUrl: e.target.value })}
+                placeholder="https://recordings.example.com/class.mp4"
+              />
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button type="submit" className="btn btn-danger">End Class</button>
+              <button type="button" className="btn btn-secondary" onClick={() => setEndForm({ id: null, recordingUrl: '' })}>Cancel</button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      <div className="grid grid-3" style={{ marginBottom: '2rem' }}>
+        <div className="card stat-card">
+          <div className="stat-value">{stats.totalCourses}</div>
+          <div className="stat-label">My Courses</div>
+        </div>
+        <div className="card stat-card">
+          <div className="stat-value">{stats.totalStudents}</div>
+          <div className="stat-label">Total Students</div>
+        </div>
+        <div className="card stat-card">
+          <div className="stat-value">{stats.upcomingLiveClasses}</div>
+          <div className="stat-label">Upcoming Live Classes</div>
+        </div>
+      </div>
+
+      <div className="card" style={{ marginBottom: '2rem' }}>
+        <h2 style={{ marginBottom: '1rem' }}>Live Classes</h2>
+        {liveClasses.length === 0 ? (
+          <p style={{ color: 'var(--text-muted)' }}>No live classes scheduled yet.</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Course</th>
+                <th>Scheduled</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {liveClasses.map((lc) => (
+                <tr key={lc.id}>
+                  <td>
+                    {lc.title}
+                    {lc.isPremium && <span className="badge badge-warning" style={{ marginLeft: '0.5rem' }}>Premium</span>}
+                  </td>
+                  <td>{lc.course?.title}</td>
+                  <td>{new Date(lc.scheduledAt).toLocaleString()}</td>
+                  <td>
+                    <span className={`badge ${lc.status === 'LIVE' ? 'badge-danger' : lc.status === 'COMPLETED' ? 'badge-success' : 'badge-primary'}`}>
+                      {lc.status}
+                    </span>
+                  </td>
+                  <td style={{ display: 'flex', gap: '0.5rem' }}>
+                    {lc.status === 'SCHEDULED' && (
+                      <button onClick={() => handleStartClass(lc.id)} className="btn btn-sm btn-primary">Start</button>
+                    )}
+                    {lc.status === 'LIVE' && (
+                      <button onClick={() => setEndForm({ id: lc.id, recordingUrl: '' })} className="btn btn-sm btn-danger">End</button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      <div className="card">
+        <h2 style={{ marginBottom: '1rem' }}>My Courses</h2>
+        {courses.length === 0 ? (
+          <p style={{ color: 'var(--text-muted)' }}>No courses yet. Create your first course!</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Chapters</th>
+                <th>Students</th>
+                <th>Published</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {courses.map((c) => (
+                <tr key={c.id}>
+                  <td>{c.title}</td>
+                  <td>{c._count?.chapters || 0}</td>
+                  <td>{c._count?.enrollments || 0}</td>
+                  <td>{c.isPublished ? <span className="badge badge-success">Yes</span> : <span className="badge badge-warning">Draft</span>}</td>
+                  <td><Link to={`/courses/${c.id}`} className="btn btn-sm btn-secondary">View</Link></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
+

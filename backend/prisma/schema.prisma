@@ -1,0 +1,343 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  ALL_LEVELS
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum LiveClassStatus {
+  SCHEDULED
+  LIVE
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(STUDENT)
+  avatar    String?
+  headline  String?
+  bio       String?
+  website   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  coursesTaught   Course[]         @relation("TeacherCourses")
+  subscriptions   Subscription[]
+  payments        Payment[]
+  coursePurchases CoursePurchase[]
+  videoProgress   VideoProgress[]
+  enrollments     Enrollment[]
+  refreshTokens   RefreshToken[]
+  reviews         Review[]
+  wishlist        Wishlist[]
+  cartItems       CartItem[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  slug      String   @unique
+  icon      String?
+  createdAt DateTime @default(now())
+
+  courses Course[]
+
+  @@map("categories")
+}
+
+model Course {
+  id                  String      @id @default(uuid())
+  title               String
+  subtitle            String?
+  description         String
+  thumbnail           String?
+  price               Int         @default(0)
+  originalPrice       Int?
+  level               CourseLevel @default(ALL_LEVELS)
+  language            String      @default("English")
+  learningObjectives  String[]
+  requirements        String[]
+  targetAudience      String[]
+  isPublished         Boolean     @default(false)
+  teacherId           String
+  categoryId          String?
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  teacher         User             @relation("TeacherCourses", fields: [teacherId], references: [id], onDelete: Cascade)
+  category        Category?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  chapters        Chapter[]
+  liveClasses     LiveClass[]
+  enrollments     Enrollment[]
+  reviews         Review[]
+  wishlist        Wishlist[]
+  cartItems       CartItem[]
+  coursePurchases CoursePurchase[]
+
+  @@map("courses")
+}
+
+model Chapter {
+  id        String   @id @default(uuid())
+  title     String
+  order     Int      @default(0)
+  courseId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons Lesson[]
+
+  @@map("chapters")
+}
+
+model Lesson {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  videoUrl    String?
+  videoKey    String?
+  duration    Int      @default(0)
+  isPremium   Boolean  @default(false)
+  order       Int      @default(0)
+  chapterId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  chapter       Chapter         @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  videoProgress VideoProgress[]
+
+  @@map("lessons")
+}
+
+model SubscriptionPlan {
+  id           String   @id @default(uuid())
+  name         String
+  description  String?
+  price        Int
+  durationDays Int
+  features     String[]
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  subscriptions Subscription[]
+  payments      Payment[]
+
+  @@map("subscription_plans")
+}
+
+model Subscription {
+  id        String             @id @default(uuid())
+  userId    String
+  planId    String
+  startDate DateTime           @default(now())
+  endDate   DateTime
+  status    SubscriptionStatus @default(ACTIVE)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  user User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan SubscriptionPlan @relation(fields: [planId], references: [id])
+
+  @@map("subscriptions")
+}
+
+model Payment {
+  id                String        @id @default(uuid())
+  userId            String
+  planId            String
+  razorpayOrderId   String        @unique
+  razorpayPaymentId String?
+  razorpaySignature String?
+  amount            Int
+  currency          String        @default("INR")
+  status            PaymentStatus @default(PENDING)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  user User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan SubscriptionPlan @relation(fields: [planId], references: [id])
+
+  @@map("payments")
+}
+
+model LiveClass {
+  id           String          @id @default(uuid())
+  title        String
+  description  String?
+  courseId     String
+  scheduledAt  DateTime
+  startedAt    DateTime?
+  endedAt      DateTime?
+  meetingUrl   String?
+  liveStreamId String?
+  recordingUrl String?
+  isPremium    Boolean         @default(false)
+  status       LiveClassStatus @default(SCHEDULED)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  course          Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  recordedClasses RecordedClass[]
+
+  @@map("live_classes")
+}
+
+model RecordedClass {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  videoUrl    String
+  videoKey    String?
+  liveClassId String?
+  courseId    String?
+  recordedAt  DateTime @default(now())
+  duration    Int      @default(0)
+  isPremium   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  liveClass LiveClass? @relation(fields: [liveClassId], references: [id], onDelete: SetNull)
+
+  @@map("recorded_classes")
+}
+
+model VideoProgress {
+  id             String   @id @default(uuid())
+  userId         String
+  lessonId       String
+  watchedSeconds Int      @default(0)
+  completed      Boolean  @default(false)
+  lastWatchedAt  DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@map("video_progress")
+}
+
+model Enrollment {
+  id         String   @id @default(uuid())
+  userId     String
+  courseId   String
+  enrolledAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@map("enrollments")
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  userId    String
+  courseId  String
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@map("reviews")
+}
+
+model Wishlist {
+  id        String   @id @default(uuid())
+  userId    String
+  courseId  String
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@map("wishlist")
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  userId    String
+  courseId  String
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@map("cart_items")
+}
+
+model CoursePurchase {
+  id                String        @id @default(uuid())
+  userId            String
+  courseId          String
+  razorpayOrderId   String        @unique
+  razorpayPaymentId String?
+  razorpaySignature String?
+  amount            Int
+  currency          String        @default("INR")
+  status            PaymentStatus @default(PENDING)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@map("course_purchases")
+}

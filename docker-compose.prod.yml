@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: elearning-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: elearning
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: elearning
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U elearning -d elearning']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: elearning-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: elearning-api
+    restart: unless-stopped
+    env_file:
+      - ./deploy/.env.production
+    environment:
+      DATABASE_URL: postgresql://elearning:${DB_PASSWORD}@postgres:5432/elearning?schema=public
+      REDIS_URL: redis://redis:6379
+    ports:
+      - '127.0.0.1:5000:5000'
+    volumes:
+      - video_data:/app/videos
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
+  video_data:
