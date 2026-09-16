@@ -14,7 +14,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://YOUR-API-URL.onrender.com/api"
+        "EXPO_PUBLIC_API_URL": "http://165.22.209.200:9001/api"
       }
     },
     "production": {
@@ -22,7 +22,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://YOUR-API-URL.onrender.com/api"
+        "EXPO_PUBLIC_API_URL": "http://165.22.209.200:9001/api"
       }
     }
   },

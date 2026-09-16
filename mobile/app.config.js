@@ -3,10 +3,11 @@ const appJson = require('./app.json');
 /** @type {import('expo/config').ExpoConfig} */
 module.exports = {
   ...appJson.expo,
+  plugins: ['expo-asset', 'expo-font'],
   extra: {
-    apiUrl: process.env.EXPO_PUBLIC_API_URL || 'https://YOUR-API-URL.onrender.com/api',
+    apiUrl: process.env.EXPO_PUBLIC_API_URL || 'http://165.22.209.200:9001/api',
     eas: {
-      projectId: process.env.EAS_PROJECT_ID || undefined,
+      projectId: '5f69db45-789c-433c-9c23-1ec5784cdac9',
     },
   },
 };
