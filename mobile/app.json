@@ -21,8 +21,7 @@
         "backgroundColor": "#5624d0"
       },
       "package": "com.edulearn.mobile",
-      "permissions": ["INTERNET"],
-      "usesCleartextTraffic": true
+      "permissions": ["INTERNET"]
     },
     "web": {
       "favicon": "./assets/favicon.png"

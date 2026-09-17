@@ -1,0 +1,10 @@
+node_modules/
+.expo/
+dist/
+.env
+.env.local
+android/
+ios/
+eas-build-log.txt
+eas-log*.bin
+eas-log*.txt
