@@ -17,11 +17,33 @@ services:
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     ports:
-      - '127.0.0.1:${APP_PORT:-9001}:${APP_PORT:-9001}'
+      - '0.0.0.0:${APP_PORT:-9001}:${APP_PORT:-9001}'
     volumes:
       - video_data:/app/videos
     depends_on:
       - redis
+    networks:
+      - default
+      - hotelbooking_default
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
+    container_name: elearning-web
+    restart: unless-stopped
+    ports:
+      - '0.0.0.0:${WEB_PORT:-9002}:80'
+    depends_on:
+      - api
+    networks:
+      - default
+
+networks:
+  hotelbooking_default:
+    external: true
 
 volumes:
   redis_data:

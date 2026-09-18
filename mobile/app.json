@@ -1,30 +1,32 @@
-{
-  "expo": {
-    "name": "Avi SkillStream",
-    "slug": "avi-skillstream",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "dark",
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#5624d0"
-    },
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.edulearn.mobile"
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#5624d0"
-      },
-      "package": "com.edulearn.mobile",
-      "permissions": ["INTERNET"]
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    }
-  }
-}
+{
+  "expo": {
+    "name": "Avi SkillStream",
+    "slug": "avi-skillstream",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#5624d0"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.aviskillstream.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#5624d0"
+      },
+      "package": "com.aviskillstream.app",
+      "permissions": ["INTERNET"]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "owner": "avinashims"
+  }
+}
+

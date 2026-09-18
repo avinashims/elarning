@@ -90,24 +90,74 @@ openssl rand -hex 32
 
 ---
 
-## Step 4 — Start e-learning API
+## Step 4 — Start e-learning API + Web
 
 ```bash
-cd /opt/elearning
+cd /opt/elearning   # or /opt/elarning on your server
 bash deploy/deploy-shared.sh
 ```
+
+This starts:
+
+| Service | Port | URL |
+|---------|------|-----|
+| **Web** (React) | **9002** | `http://YOUR_DROPLET_IP:9002` |
+| **API** (mobile) | **9001** | `http://YOUR_DROPLET_IP:9001/api` |
 
 Test:
 
 ```bash
 curl http://127.0.0.1:9001/api/health
+curl -I http://127.0.0.1:9002/
 ```
 
-Expected: `"success": true`
+**Open firewall** on DigitalOcean for ports **9001** and **9002** (Inbound, All IPv4).
+
+**Teacher web access:**
+
+```
+http://YOUR_DROPLET_IP:9002/register   → choose "Teacher"
+http://YOUR_DROPLET_IP:9002/teacher    → create courses
+```
+
+Demo login: `teacher@elearning.com` / `teacher123`
 
 ---
 
-## Step 5 — Nginx + HTTPS (for global Android APK)
+## Step 4b — Update after code changes
+
+```bash
+cd /opt/elearning
+git pull
+bash deploy/deploy-shared.sh
+```
+
+## Step 5 — Nginx on port 80 (optional — one URL for web + API)
+
+If you want `http://YOUR_DROPLET_IP/` instead of `:9002`:
+
+```bash
+cd /opt/elearning
+nano deploy/nginx-elearning-site.conf
+# Set server_name to YOUR_DROPLET_IP or learn.yourdomain.com
+
+cp deploy/nginx-elearning-site.conf /etc/nginx/sites-available/elearning
+ln -sf /etc/nginx/sites-available/elearning /etc/nginx/sites-enabled/
+nginx -t && systemctl reload nginx
+```
+
+Then set in `deploy/.env.production`:
+
+```env
+FRONTEND_URL=http://YOUR_DROPLET_IP
+CORS_ORIGINS=http://YOUR_DROPLET_IP
+```
+
+Rebuild: `bash deploy/deploy-shared.sh`
+
+---
+
+## Step 6 — Nginx + HTTPS (for global Android APK)
 
 Add a subdomain `api.yourdomain.com` → your Droplet IP (DNS A record).
 
@@ -131,7 +181,7 @@ curl https://api.yourdomain.com/api/health
 
 ---
 
-## Step 6 — Build Android APK (your PC)
+## Step 7 — Build Android APK (your PC)
 
 Edit `mobile/eas.json`:
 

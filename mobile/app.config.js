@@ -18,7 +18,7 @@ module.exports = {
   extra: {
     apiUrl: process.env.EXPO_PUBLIC_API_URL || 'http://165.22.209.200:9001/api',
     eas: {
-      projectId: '5f69db45-789c-433c-9c23-1ec5784cdac9',
+      projectId: '799097d3-64c8-44e9-b683-ba56645126e9',
     },
   },
 };
