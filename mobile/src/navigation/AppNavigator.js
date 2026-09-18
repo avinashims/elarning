@@ -58,7 +58,7 @@ function MainTabs() {
         tabBarIcon: ({ focused }) => <TabIcon label={route.name} focused={focused} />,
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Udemy' }} />
+      <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Avi SkillStream' }} />
       <Tab.Screen name="Courses" component={CoursesScreen} options={{ title: 'Courses' }} />
       <Tab.Screen
         name="Learning"

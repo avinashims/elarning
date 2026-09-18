@@ -29,7 +29,7 @@ export default function LoginScreen({ navigation }) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Text style={styles.logo}>Udemy</Text>
+        <Text style={styles.logo}>Avi SkillStream</Text>
         <Text style={styles.title}>Log in to continue your learning journey</Text>
 
         <Text style={styles.label}>Email</Text>

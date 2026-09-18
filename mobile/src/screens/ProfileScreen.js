@@ -20,7 +20,7 @@ export default function ProfileScreen({ navigation }) {
   if (!user) {
     return (
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Welcome to Udemy</Text>
+        <Text style={styles.title}>Welcome to Avi SkillStream</Text>
         <Text style={styles.subtitle}>Sign in to access courses, cart, and learning</Text>
         <Button title="Sign In" onPress={() => navigation.navigate('Login')} />
         <Button

@@ -25,6 +25,15 @@
       "env": {
         "EXPO_PUBLIC_API_URL": "http://165.22.209.200:9001/api"
       }
+    },
+    "production-store": {
+      "distribution": "store",
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "http://165.22.209.200:9001/api"
+      }
     }
   },
   "submit": {
