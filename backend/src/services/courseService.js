@@ -154,6 +154,7 @@ async function createCourse(data, user) {
       targetAudience: data.targetAudience ?? [],
       categoryId: data.categoryId,
       teacherId: resolvedTeacherId,
+      isPublished: data.isPublished ?? false,
     },
     include: { teacher: { select: { id: true, name: true } }, category: true },
   });

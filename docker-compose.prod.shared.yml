@@ -20,6 +20,7 @@ services:
       - '0.0.0.0:${APP_PORT:-9001}:${APP_PORT:-9001}'
     volumes:
       - video_data:/app/videos
+      - uploads_data:/app/uploads
     depends_on:
       - redis
     networks:
@@ -48,3 +49,4 @@ networks:
 volumes:
   redis_data:
   video_data:
+  uploads_data:

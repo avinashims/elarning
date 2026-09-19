@@ -2,12 +2,18 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
 
+const emptyCourseForm = { title: '', description: '', thumbnail: '', isPublished: true };
+
 export default function TeacherDashboard() {
   const [data, setData] = useState(null);
   const [liveClasses, setLiveClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(null);
-  const [form, setForm] = useState({ title: '', description: '', thumbnail: '' });
+  const [editingCourseId, setEditingCourseId] = useState(null);
+  const [form, setForm] = useState(emptyCourseForm);
+  const [thumbnailFile, setThumbnailFile] = useState(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState('');
+  const [saving, setSaving] = useState(false);
   const [liveForm, setLiveForm] = useState({
     courseId: '',
     title: '',
@@ -34,15 +40,90 @@ export default function TeacherDashboard() {
 
   useEffect(() => { fetchData(); }, []);
 
-  const handleCreateCourse = async (e) => {
+  const resetCourseForm = () => {
+    setForm(emptyCourseForm);
+    setThumbnailFile(null);
+    setThumbnailPreview('');
+    setEditingCourseId(null);
+    setShowForm(null);
+  };
+
+  const openCreateCourse = () => {
+    setEditingCourseId(null);
+    setForm(emptyCourseForm);
+    setThumbnailFile(null);
+    setThumbnailPreview('');
+    setShowForm('course');
+  };
+
+  const openEditCourse = (course) => {
+    setEditingCourseId(course.id);
+    setForm({
+      title: course.title,
+      description: course.description,
+      thumbnail: course.thumbnail || '',
+      isPublished: course.isPublished,
+    });
+    setThumbnailFile(null);
+    setThumbnailPreview(course.thumbnail || '');
+    setShowForm('course');
+  };
+
+  const handleThumbnailChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setThumbnailFile(file);
+    setThumbnailPreview(URL.createObjectURL(file));
+  };
+
+  const uploadThumbnail = async () => {
+    if (!thumbnailFile) return form.thumbnail || undefined;
+
+    const payload = new FormData();
+    payload.append('thumbnail', thumbnailFile);
+    const res = await api.post('/uploads/thumbnail', payload, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data.data.url;
+  };
+
+  const handleSaveCourse = async (e) => {
     e.preventDefault();
+    setSaving(true);
     try {
-      await api.post('/courses', { ...form, isPublished: true });
-      setShowForm(null);
-      setForm({ title: '', description: '', thumbnail: '' });
+      const thumbnail = await uploadThumbnail();
+      const body = {
+        title: form.title,
+        description: form.description,
+        isPublished: form.isPublished,
+        ...(thumbnail ? { thumbnail } : {}),
+      };
+
+      if (editingCourseId) {
+        await api.put(`/courses/${editingCourseId}`, body);
+        alert('Course updated!');
+      } else {
+        await api.post('/courses', body);
+        alert('Course created!');
+      }
+
+      resetCourseForm();
       fetchData();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to create course');
+      alert(err.response?.data?.message || 'Failed to save course');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteCourse = async (course) => {
+    if (!window.confirm(`Delete "${course.title}"? This cannot be undone.`)) return;
+    try {
+      await api.delete(`/courses/${course.id}`);
+      fetchData();
+      alert('Course deleted');
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to delete course');
     }
   };
 
@@ -105,7 +186,7 @@ export default function TeacherDashboard() {
           <p>Manage your courses and live classes</p>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button onClick={() => setShowForm(showForm === 'course' ? null : 'course')} className="btn btn-primary btn-sm">
+          <button onClick={openCreateCourse} className="btn btn-primary btn-sm">
             + New Course
           </button>
           <button onClick={() => setShowForm(showForm === 'live' ? null : 'live')} className="btn btn-secondary btn-sm">
@@ -116,8 +197,8 @@ export default function TeacherDashboard() {
 
       {showForm === 'course' && (
         <div className="card" style={{ marginBottom: '2rem' }}>
-          <h3 style={{ marginBottom: '1rem' }}>Create Course</h3>
-          <form onSubmit={handleCreateCourse}>
+          <h3 style={{ marginBottom: '1rem' }}>{editingCourseId ? 'Edit Course' : 'Create Course'}</h3>
+          <form onSubmit={handleSaveCourse}>
             <div className="form-group">
               <label>Title</label>
               <input className="form-control" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
@@ -127,10 +208,25 @@ export default function TeacherDashboard() {
               <textarea className="form-control" rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
             </div>
             <div className="form-group">
-              <label>Thumbnail URL</label>
-              <input className="form-control" value={form.thumbnail} onChange={(e) => setForm({ ...form, thumbnail: e.target.value })} />
+              <label>Thumbnail image</label>
+              <input type="file" className="form-control" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleThumbnailChange} />
+              <small style={{ color: 'var(--text-muted)' }}>JPG, PNG, WEBP or GIF — max 5MB</small>
+              {thumbnailPreview && (
+                <img src={thumbnailPreview} alt="Preview" style={{ display: 'block', marginTop: '0.75rem', maxWidth: 240, borderRadius: 8 }} />
+              )}
             </div>
-            <button type="submit" className="btn btn-primary">Create Course</button>
+            <div className="form-group">
+              <label>
+                <input type="checkbox" checked={form.isPublished} onChange={(e) => setForm({ ...form, isPublished: e.target.checked })} />
+                {' '}Published (visible to students)
+              </label>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button type="submit" className="btn btn-primary" disabled={saving}>
+                {saving ? 'Saving...' : editingCourseId ? 'Update Course' : 'Create Course'}
+              </button>
+              <button type="button" className="btn btn-secondary" onClick={resetCourseForm}>Cancel</button>
+            </div>
           </form>
         </div>
       )}
@@ -279,7 +375,11 @@ export default function TeacherDashboard() {
                   <td>{c._count?.chapters || 0}</td>
                   <td>{c._count?.enrollments || 0}</td>
                   <td>{c.isPublished ? <span className="badge badge-success">Yes</span> : <span className="badge badge-warning">Draft</span>}</td>
-                  <td><Link to={`/courses/${c.id}`} className="btn btn-sm btn-secondary">View</Link></td>
+                  <td style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <Link to={`/courses/${c.id}`} className="btn btn-sm btn-secondary">View</Link>
+                    <button type="button" onClick={() => openEditCourse(c)} className="btn btn-sm btn-primary">Edit</button>
+                    <button type="button" onClick={() => handleDeleteCourse(c)} className="btn btn-sm btn-danger">Delete</button>
+                  </td>
                 </tr>
               ))}
             </tbody>

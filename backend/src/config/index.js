@@ -1,4 +1,5 @@
 require('dotenv').config();
+const path = require('path');
 
 module.exports = {
   port: process.env.PORT || 5000,
@@ -25,4 +26,5 @@ module.exports = {
     signingSecret: process.env.VIDEO_SIGNING_SECRET || 'dev-video-signing-secret-change-me',
     urlExpirySeconds: parseInt(process.env.VIDEO_URL_EXPIRY_SECONDS || '900', 10),
   },
+  uploadsPath: path.resolve(process.env.UPLOADS_PATH || path.join(__dirname, '../../uploads')),
 };

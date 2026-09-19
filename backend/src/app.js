@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -18,10 +19,13 @@ const reviewRoutes = require('./routes/reviewRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const wishlistRoutes = require('./routes/wishlistRoutes');
 const videoRoutes = require('./routes/videoRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
 
 const app = express();
 
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+}));
 app.use(cors({
   origin(origin, callback) {
     if (!origin) return callback(null, true);
@@ -47,6 +51,9 @@ if (config.nodeEnv !== 'test') {
 app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'E-Learning API is running', timestamp: new Date().toISOString() });
 });
+
+app.use('/api/uploads', uploadRoutes);
+app.use('/api/uploads', express.static(path.join(config.uploadsPath)));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);

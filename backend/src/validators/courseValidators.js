@@ -1,5 +1,17 @@
 const { body } = require('express-validator');
 
+function isValidThumbnail(value) {
+  if (!value) return true;
+  if (typeof value !== 'string') return false;
+  if (value.startsWith('/api/uploads/thumbnails/')) return true;
+  try {
+    const url = new URL(value);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 const createCourseValidation = [
   body('title')
     .trim()
@@ -15,8 +27,16 @@ const createCourseValidation = [
     .withMessage('Description must be between 10 and 5000 characters'),
   body('thumbnail')
     .optional({ values: 'null' })
-    .isURL()
-    .withMessage('Thumbnail must be a valid URL'),
+    .custom((value) => {
+      if (!isValidThumbnail(value)) {
+        throw new Error('Thumbnail must be a valid URL or uploaded image path');
+      }
+      return true;
+    }),
+  body('isPublished')
+    .optional()
+    .isBoolean()
+    .withMessage('isPublished must be a boolean'),
   body('teacherId')
     .optional()
     .isUUID()
@@ -40,8 +60,12 @@ const updateCourseValidation = [
     .withMessage('Description must be between 10 and 5000 characters'),
   body('thumbnail')
     .optional({ values: 'null' })
-    .isURL()
-    .withMessage('Thumbnail must be a valid URL'),
+    .custom((value) => {
+      if (!isValidThumbnail(value)) {
+        throw new Error('Thumbnail must be a valid URL or uploaded image path');
+      }
+      return true;
+    }),
   body('isPublished')
     .optional()
     .isBoolean()
