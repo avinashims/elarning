@@ -37,6 +37,14 @@ const createCourseValidation = [
     .optional()
     .isBoolean()
     .withMessage('isPublished must be a boolean'),
+  body('price')
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage('Price must be a whole number (0 for free)'),
+  body('originalPrice')
+    .optional({ values: 'null' })
+    .isInt({ min: 0 })
+    .withMessage('Original price must be a whole number'),
   body('teacherId')
     .optional()
     .isUUID()
@@ -70,6 +78,14 @@ const updateCourseValidation = [
     .optional()
     .isBoolean()
     .withMessage('isPublished must be a boolean'),
+  body('price')
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage('Price must be a whole number (0 for free)'),
+  body('originalPrice')
+    .optional({ values: 'null' })
+    .isInt({ min: 0 })
+    .withMessage('Original price must be a whole number'),
   body('teacherId')
     .optional()
     .isUUID()
