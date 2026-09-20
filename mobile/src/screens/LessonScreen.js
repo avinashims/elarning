@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Video, ResizeMode } from 'expo-av';
 import api from '../api/client';
-import { API_URL } from '../constants/theme';
+import { resolveMediaUrl } from '../constants/theme';
 import LoadingScreen from '../components/LoadingScreen';
 import Button from '../components/Button';
 import { colors, spacing } from '../constants/theme';
@@ -38,10 +38,7 @@ export default function LessonScreen({ route, navigation }) {
 
         const accessRes = await api.get(`/videos/lessons/${lessonId}/access`);
         const { signedUrl } = accessRes.data.data;
-        const absoluteUrl = signedUrl.startsWith('http')
-          ? signedUrl
-          : `${API_URL.replace(/\/api$/, '')}${signedUrl}`;
-        setVideoUri(absoluteUrl);
+        setVideoUri(resolveMediaUrl(signedUrl));
       } catch (err) {
         const msg = err.response?.data?.message || 'Failed to load lesson';
         setError(msg);

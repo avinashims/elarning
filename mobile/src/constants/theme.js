@@ -32,3 +32,17 @@ export const API_URL =
   process.env.EXPO_PUBLIC_API_URL ||
   Constants.expoConfig?.extra?.apiUrl ||
   'http://10.0.2.2:5000/api';
+
+/** Base origin for images/files (e.g. http://165.22.209.200:9001) */
+export function getApiOrigin() {
+  return API_URL.replace(/\/api\/?$/, '');
+}
+
+/** Turn /api/uploads/... or https://... into a URL React Native Image can load */
+export function resolveMediaUrl(url) {
+  if (!url || typeof url !== 'string') return null;
+  const trimmed = url.trim();
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+  if (trimmed.startsWith('/')) return `${getApiOrigin()}${trimmed}`;
+  return trimmed;
+}

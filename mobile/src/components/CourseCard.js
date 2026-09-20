@@ -1,5 +1,5 @@
 import { TouchableOpacity, View, Text, Image, StyleSheet } from 'react-native';
-import { colors, spacing } from '../constants/theme';
+import { colors, spacing, resolveMediaUrl } from '../constants/theme';
 
 function formatPrice(price) {
   if (!price || price === 0) return 'Free';
@@ -8,11 +8,12 @@ function formatPrice(price) {
 
 export default function CourseCard({ course, onPress }) {
   const rating = course.rating?.average || 0;
+  const thumbnailUri = resolveMediaUrl(course.thumbnail);
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
-      {course.thumbnail ? (
-        <Image source={{ uri: course.thumbnail }} style={styles.image} />
+      {thumbnailUri ? (
+        <Image source={{ uri: thumbnailUri }} style={styles.image} />
       ) : (
         <View style={[styles.image, styles.placeholder]}>
           <Text style={styles.placeholderText}>📖</Text>

@@ -6,7 +6,7 @@ import api from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/Button';
 import LoadingScreen from '../components/LoadingScreen';
-import { colors, spacing } from '../constants/theme';
+import { colors, spacing, resolveMediaUrl } from '../constants/theme';
 
 function formatPrice(price) {
   if (!price || price === 0) return 'Free';
@@ -89,10 +89,11 @@ export default function CourseDetailScreen({ route, navigation }) {
   const isFree = !course.price || course.price === 0;
   const isOwned = course.isOwned || course.isEnrolled;
   const rating = course.rating || { average: 0, count: 0 };
+  const thumbnailUri = resolveMediaUrl(course.thumbnail);
 
   return (
     <ScrollView style={styles.container}>
-      {course.thumbnail && <Image source={{ uri: course.thumbnail }} style={styles.banner} />}
+      {thumbnailUri ? <Image source={{ uri: thumbnailUri }} style={styles.banner} /> : null}
       <View style={styles.content}>
         <Text style={styles.title}>{course.title}</Text>
         {course.subtitle && <Text style={styles.subtitle}>{course.subtitle}</Text>}

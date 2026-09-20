@@ -6,7 +6,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import api from '../api/client';
 import Button from '../components/Button';
 import LoadingScreen from '../components/LoadingScreen';
-import { colors, spacing } from '../constants/theme';
+import { colors, spacing, resolveMediaUrl } from '../constants/theme';
 
 export default function CartScreen({ navigation }) {
   const [cart, setCart] = useState({ items: [], total: 0, count: 0 });
@@ -65,8 +65,8 @@ export default function CartScreen({ navigation }) {
         }
         renderItem={({ item }) => (
           <View style={styles.item}>
-            {item.course?.thumbnail ? (
-              <Image source={{ uri: item.course.thumbnail }} style={styles.thumb} />
+            {resolveMediaUrl(item.course?.thumbnail) ? (
+              <Image source={{ uri: resolveMediaUrl(item.course.thumbnail) }} style={styles.thumb} />
             ) : (
               <View style={[styles.thumb, styles.thumbPlaceholder]} />
             )}

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { useState, useEffect, useCallback } from 'react';
+import { View, Text, FlatList, StyleSheet, RefreshControl } from 'react-native';
 import api from '../api/client';
 import CourseCard from '../components/CourseCard';
 import LoadingScreen from '../components/LoadingScreen';
@@ -8,13 +8,22 @@ import { colors, spacing } from '../constants/theme';
 export default function CoursesScreen({ navigation }) {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadCourses = useCallback(() => {
+    return api.get('/courses')
+      .then((res) => setCourses(res.data.data))
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
-    api.get('/courses')
-      .then((res) => setCourses(res.data.data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+    loadCourses().finally(() => setLoading(false));
+  }, [loadCourses]);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    loadCourses().finally(() => setRefreshing(false));
+  };
 
   if (loading) return <LoadingScreen />;
 
@@ -24,6 +33,9 @@ export default function CoursesScreen({ navigation }) {
         data={courses}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
+        }
         ListHeaderComponent={
           <View style={styles.header}>
             <Text style={styles.title}>All Courses</Text>
