@@ -17,9 +17,13 @@ export default function AdminDashboard() {
       api.get('/dashboard/admin/courses'),
     ])
       .then(([statsRes, usersRes, coursesRes]) => {
-        setData(statsRes.data.data);
-        setUsers(usersRes.data.data || []);
-        setCourses(coursesRes.data.data || []);
+        const payload = statsRes.data?.data;
+        if (!payload?.stats) {
+          throw new Error('Invalid admin dashboard response');
+        }
+        setData(payload);
+        setUsers(usersRes.data?.data || []);
+        setCourses(coursesRes.data?.data || []);
       })
       .catch((err) => {
         setData(null);

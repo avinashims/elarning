@@ -47,8 +47,12 @@ export default function TeacherDashboard() {
       api.get('/live-classes'),
     ])
       .then(([dashRes, liveRes]) => {
-        setData(dashRes.data.data);
-        setLiveClasses(liveRes.data.data || []);
+        const payload = dashRes.data?.data;
+        if (!payload?.stats || !Array.isArray(payload.courses)) {
+          throw new Error('Invalid dashboard response');
+        }
+        setData(payload);
+        setLiveClasses(liveRes.data?.data || []);
       })
       .catch((err) => {
         setData(null);
