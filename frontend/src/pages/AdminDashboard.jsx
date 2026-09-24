@@ -6,8 +6,11 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
   const loadData = () => {
+    setLoadError('');
+    setLoading(true);
     Promise.all([
       api.get('/dashboard/admin'),
       api.get('/dashboard/admin/users'),
@@ -15,10 +18,13 @@ export default function AdminDashboard() {
     ])
       .then(([statsRes, usersRes, coursesRes]) => {
         setData(statsRes.data.data);
-        setUsers(usersRes.data.data);
-        setCourses(coursesRes.data.data);
+        setUsers(usersRes.data.data || []);
+        setCourses(coursesRes.data.data || []);
       })
-      .catch(console.error)
+      .catch((err) => {
+        setData(null);
+        setLoadError(err.response?.data?.message || 'Could not load admin dashboard.');
+      })
       .finally(() => setLoading(false));
   };
 
@@ -47,6 +53,15 @@ export default function AdminDashboard() {
   };
 
   if (loading) return <div className="loading container">Loading dashboard...</div>;
+
+  if (!data?.stats) {
+    return (
+      <div className="container" style={{ paddingTop: '2rem' }}>
+        <div className="alert alert-error">{loadError || 'Could not load admin dashboard.'}</div>
+        <button type="button" className="btn btn-primary" onClick={loadData}>Retry</button>
+      </div>
+    );
+  }
 
   const { stats } = data;
 

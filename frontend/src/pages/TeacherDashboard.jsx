@@ -37,17 +37,23 @@ export default function TeacherDashboard() {
     isPremium: false,
   });
   const [endForm, setEndForm] = useState({ id: null, recordingUrl: '' });
+  const [loadError, setLoadError] = useState('');
 
   const fetchData = () => {
+    setLoadError('');
+    setLoading(true);
     Promise.all([
       api.get('/dashboard/teacher'),
       api.get('/live-classes'),
     ])
       .then(([dashRes, liveRes]) => {
         setData(dashRes.data.data);
-        setLiveClasses(liveRes.data.data);
+        setLiveClasses(liveRes.data.data || []);
       })
-      .catch(console.error)
+      .catch((err) => {
+        setData(null);
+        setLoadError(err.response?.data?.message || 'Could not load dashboard. Is the API running?');
+      })
       .finally(() => setLoading(false));
   };
 
@@ -226,6 +232,15 @@ export default function TeacherDashboard() {
   };
 
   if (loading) return <div className="loading container">Loading...</div>;
+
+  if (!data) {
+    return (
+      <div className="container" style={{ paddingTop: '2rem' }}>
+        <div className="alert alert-error">{loadError || 'Could not load teacher dashboard.'}</div>
+        <button type="button" className="btn btn-primary" onClick={fetchData}>Retry</button>
+      </div>
+    );
+  }
 
   const { stats, courses } = data;
 
