@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import GoogleSignInButton from '../components/GoogleSignInButton';
+import { getAuthErrorMessage } from '../utils/authErrorMessage';
 import './Auth.css';
 
 export default function Register() {
@@ -38,7 +39,7 @@ export default function Register() {
       if (form.role === 'TEACHER') navigate('/teacher');
       else navigate('/my-courses');
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      setError(getAuthErrorMessage(err, 'Registration failed'));
     } finally {
       setLoading(false);
     }

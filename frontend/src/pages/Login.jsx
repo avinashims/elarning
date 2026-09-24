@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import GoogleSignInButton from '../components/GoogleSignInButton';
+import { getAuthErrorMessage } from '../utils/authErrorMessage';
 import './Auth.css';
 
 export default function Login() {
@@ -39,7 +40,7 @@ export default function Login() {
       const user = await login(email, password);
       redirectAfterAuth(user);
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      setError(getAuthErrorMessage(err, 'Login failed'));
     } finally {
       setLoading(false);
     }
