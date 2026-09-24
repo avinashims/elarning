@@ -15,7 +15,12 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    api.get('/categories').then((res) => setCategories(res.data.data)).catch(() => {});
+    api.get('/categories')
+      .then((res) => {
+        const list = res.data?.data;
+        setCategories(Array.isArray(list) ? list : []);
+      })
+      .catch(() => setCategories([]));
   }, []);
 
   useEffect(() => {
@@ -75,7 +80,7 @@ export default function Navbar() {
             <>
               <Link to="/my-courses" className="nav-link hide-mobile">My learning</Link>
               <Link to="/wishlist" className="nav-icon" title="Wishlist">♡ {wishlistCount > 0 && <span className="badge-count">{wishlistCount}</span>}</Link>
-              <Link to="/cart" className="nav-icon" title="Cart">🛒 {cart.count > 0 && <span className="badge-count">{cart.count}</span>}</Link>
+              <Link to="/cart" className="nav-icon" title="Cart">🛒 {(cart?.count ?? 0) > 0 && <span className="badge-count">{cart.count}</span>}</Link>
               <span className="user-name">{user.name.split(' ')[0]}</span>
               <button onClick={handleLogout} className="btn btn-sm btn-secondary hide-mobile">Log out</button>
             </>
@@ -114,7 +119,7 @@ export default function Navbar() {
             <Link to="/live-classes" onClick={closeMobile}>Live classes</Link>
             {user && <Link to="/my-courses" onClick={closeMobile}>My learning</Link>}
             {user && <Link to="/wishlist" onClick={closeMobile}>Wishlist</Link>}
-            {user && <Link to="/cart" onClick={closeMobile}>Cart ({cart.count})</Link>}
+            {user && <Link to="/cart" onClick={closeMobile}>Cart ({cart?.count ?? 0})</Link>}
             {isTeacher && <Link to="/teacher" onClick={closeMobile}>Instructor</Link>}
             {isAdmin && <Link to="/admin" onClick={closeMobile}>Admin</Link>}
 

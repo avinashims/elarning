@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ErrorBoundary from './components/ErrorBoundary';
 import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -21,6 +22,7 @@ import './App.css';
 
 export default function App() {
   return (
+    <ErrorBoundary>
     <div className="app">
       <Navbar />
       <main className="main-content">
@@ -58,5 +60,6 @@ export default function App() {
       </main>
       <Footer />
     </div>
+    </ErrorBoundary>
   );
 }

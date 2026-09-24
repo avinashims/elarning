@@ -4,8 +4,18 @@ const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 const api = axios.create({
   baseURL: API_URL,
-  headers: { 'Content-Type': 'application/json' },
+  headers: {
+    'Content-Type': 'application/json',
+    'Cache-Control': 'no-cache',
+    Pragma: 'no-cache',
+  },
 });
+
+function isValidApiPayload(response) {
+  if (response.status === 304) return false;
+  const data = response.data;
+  return data != null && data !== '' && typeof data === 'object' && data.success !== undefined;
+}
 
 let isRefreshing = false;
 let failedQueue = [];
@@ -29,11 +39,21 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  config.params = { ...config.params, _t: Date.now() };
   return config;
 });
 
 api.interceptors.response.use(
-  (response) => response,
+  async (response) => {
+    if (isValidApiPayload(response)) {
+      return response;
+    }
+    if (!response.config._retriedEmptyBody) {
+      response.config._retriedEmptyBody = true;
+      return api.request(response.config);
+    }
+    return Promise.reject(new Error('Empty API response (browser cache). Hard refresh the page.'));
+  },
   async (error) => {
     const originalRequest = error.config;
 

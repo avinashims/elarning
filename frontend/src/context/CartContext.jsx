@@ -16,7 +16,12 @@ export function CartProvider({ children }) {
     }
     try {
       const res = await api.get('/cart');
-      setCart(res.data.data);
+      const payload = res.data?.data;
+      setCart(
+        payload && typeof payload.count === 'number'
+          ? payload
+          : { items: payload?.items || [], total: payload?.total || 0, count: payload?.count || 0 }
+      );
     } catch {
       setCart({ items: [], total: 0, count: 0 });
     }
@@ -29,7 +34,8 @@ export function CartProvider({ children }) {
     }
     try {
       const res = await api.get('/wishlist');
-      setWishlistCount(res.data.data.length);
+      const list = res.data?.data;
+      setWishlistCount(Array.isArray(list) ? list.length : 0);
     } catch {
       setWishlistCount(0);
     }
