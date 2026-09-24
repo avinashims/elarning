@@ -117,10 +117,31 @@ export default function CourseDetailScreen({ route, navigation }) {
         )}
 
         {isOwned ? (
-          <Button title="Go to course" onPress={() => {
-            const firstLesson = course.chapters?.[0]?.lessons?.[0];
-            if (firstLesson) navigation.navigate('Lesson', { lessonId: firstLesson.id, courseId });
-          }} style={{ marginBottom: spacing.sm }} />
+          <Button
+            title="Go to course"
+            onPress={() => {
+              let firstLesson = null;
+              for (const ch of course.chapters || []) {
+                for (const lesson of ch.lessons || []) {
+                  if (!lesson.locked || isOwned) {
+                    firstLesson = lesson;
+                    break;
+                  }
+                }
+                if (firstLesson) break;
+              }
+              if (firstLesson?.id) {
+                navigation.navigate('Lesson', { lessonId: firstLesson.id, courseId });
+              } else {
+                Alert.alert(
+                  'No lessons yet',
+                  'This course has no video lessons. Check Live classes or ask your instructor to add content.'
+                );
+                setTab('curriculum');
+              }
+            }}
+            style={{ marginBottom: spacing.sm }}
+          />
         ) : isFree ? (
           <Button title="Enroll now" onPress={handleEnroll} loading={actionLoading} style={{ marginBottom: spacing.sm }} />
         ) : (

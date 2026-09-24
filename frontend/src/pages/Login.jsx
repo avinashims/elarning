@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 import './Auth.css';
 
 export default function Login() {
@@ -8,8 +9,27 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
+
+  const redirectAfterAuth = (user) => {
+    if (user.role === 'ADMIN') navigate('/admin');
+    else if (user.role === 'TEACHER') navigate('/teacher');
+    else navigate('/my-courses');
+  };
+
+  const handleGoogleCredential = async (idToken) => {
+    setError('');
+    setLoading(true);
+    try {
+      const user = await loginWithGoogle(idToken, 'STUDENT');
+      redirectAfterAuth(user);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Google sign-in failed');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,9 +37,7 @@ export default function Login() {
     setLoading(true);
     try {
       const user = await login(email, password);
-      if (user.role === 'ADMIN') navigate('/admin');
-      else if (user.role === 'TEACHER') navigate('/teacher');
-      else navigate('/my-courses');
+      redirectAfterAuth(user);
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
     } finally {
@@ -60,6 +78,8 @@ export default function Login() {
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
+
+        <GoogleSignInButton onCredential={handleGoogleCredential} disabled={loading} />
 
         <p className="auth-footer">
           Don't have an account? <Link to="/register">Sign up</Link>

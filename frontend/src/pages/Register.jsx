@@ -1,14 +1,29 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 import './Auth.css';
 
 export default function Register() {
   const [form, setForm] = useState({ name: '', email: '', password: '', role: 'STUDENT' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
+
+  const handleGoogleCredential = async (idToken) => {
+    setError('');
+    setLoading(true);
+    try {
+      const user = await loginWithGoogle(idToken, form.role);
+      if (user.role === 'TEACHER') navigate('/teacher');
+      else navigate('/my-courses');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Google sign-in failed');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -61,6 +76,8 @@ export default function Register() {
             {loading ? 'Creating account...' : 'Create Account'}
           </button>
         </form>
+
+        <GoogleSignInButton onCredential={handleGoogleCredential} disabled={loading} text="signup_with" />
 
         <p className="auth-footer">
           Already have an account? <Link to="/login">Sign in</Link>

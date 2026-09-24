@@ -61,6 +61,10 @@ async function loginUser({ email, password }) {
     throw new AppError('Invalid email or password', 401);
   }
 
+  if (!user.password) {
+    throw new AppError('This account uses Google sign-in. Continue with Google.', 401);
+  }
+
   const isValid = await comparePassword(password, user.password);
   if (!isValid) {
     throw new AppError('Invalid email or password', 401);
@@ -69,6 +73,57 @@ async function loginUser({ email, password }) {
   const { password: _, ...userWithoutPassword } = user;
   const tokens = await issueTokenPair(userWithoutPassword);
   return { user: userWithoutPassword, ...tokens };
+}
+
+async function loginWithGoogle({ idToken, role }) {
+  const { verifyGoogleIdToken } = require('../utils/googleAuth');
+  let payload;
+  try {
+    payload = await verifyGoogleIdToken(idToken);
+  } catch (err) {
+    if (err.statusCode === 503) throw new AppError(err.message, 503);
+    throw new AppError('Invalid Google sign-in token', 401);
+  }
+
+  if (!payload.email || payload.email_verified === false) {
+    throw new AppError('Google account email is not verified', 401);
+  }
+
+  const googleId = payload.sub;
+  const email = payload.email.toLowerCase();
+  const name = payload.name || email.split('@')[0];
+  const avatar = payload.picture || null;
+
+  let user = await prisma.user.findFirst({
+    where: { OR: [{ googleId }, { email }] },
+  });
+
+  if (user) {
+    user = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        googleId: user.googleId || googleId,
+        avatar: avatar || user.avatar,
+        name: user.name || name,
+      },
+      select: USER_SELECT,
+    });
+  } else {
+    const userRole = REGISTERABLE_ROLES.includes(role) ? role : ROLES.STUDENT;
+    user = await prisma.user.create({
+      data: {
+        email,
+        googleId,
+        name,
+        avatar,
+        role: userRole,
+      },
+      select: USER_SELECT,
+    });
+  }
+
+  const tokens = await issueTokenPair(user);
+  return { user, ...tokens };
 }
 
 async function refreshTokens(refreshToken) {
@@ -164,6 +219,7 @@ async function updateUserProfile(userId, { name, avatar }) {
 module.exports = {
   registerUser,
   loginUser,
+  loginWithGoogle,
   refreshTokens,
   logoutUser,
   getUserProfile,

@@ -364,6 +364,69 @@
   color: var(--text-muted);
 }
 
+.course-live-hero-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(164, 53, 240, 0.25);
+  border: 1px solid #a435f0;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.sidebar-live-heading {
+  font-size: 0.9375rem;
+  margin: 0 0 0.75rem;
+  font-weight: 700;
+}
+
+.course-live-panel {
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-card, #fff);
+}
+
+.course-live-panel.compact {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+}
+
+.course-live-empty {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.course-live-item {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.course-live-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.course-live-item-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.course-live-time {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin: 0.35rem 0 0;
+}
+
 @media (max-width: 900px) {
   .course-body {
     grid-template-columns: 1fr;

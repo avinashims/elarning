@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
+import { datetimeLocalToIso, formatAppDateTime, defaultDatetimeLocalValue } from '../utils/dateTime';
 
 const emptyCourseForm = {
   title: '',
@@ -158,11 +159,30 @@ export default function TeacherDashboard() {
     }
   };
 
+  const openScheduleLive = () => {
+    setLiveForm({
+      courseId: '',
+      title: '',
+      description: '',
+      scheduledAt: defaultDatetimeLocalValue(),
+      meetingUrl: '',
+      liveStreamId: '',
+      isPremium: false,
+    });
+    setShowForm('live');
+  };
+
   const handleCreateLiveClass = async (e) => {
     e.preventDefault();
+    if (!liveForm.meetingUrl?.trim()) {
+      alert('Add a Meeting URL (Google Meet or Zoom link) so students can join.');
+      return;
+    }
     try {
       await api.post('/live-classes', {
         ...liveForm,
+        meetingUrl: liveForm.meetingUrl.trim(),
+        scheduledAt: datetimeLocalToIso(liveForm.scheduledAt),
         isPremium: liveForm.isPremium,
       });
       setShowForm(null);
@@ -220,7 +240,14 @@ export default function TeacherDashboard() {
           <button onClick={openCreateCourse} className="btn btn-primary btn-sm">
             + New Course
           </button>
-          <button onClick={() => setShowForm(showForm === 'live' ? null : 'live')} className="btn btn-secondary btn-sm">
+          <button
+            type="button"
+            onClick={() => {
+              if (showForm === 'live') setShowForm(null);
+              else openScheduleLive();
+            }}
+            className="btn btn-secondary btn-sm"
+          >
             + Schedule Live Class
           </button>
         </div>
@@ -310,8 +337,9 @@ export default function TeacherDashboard() {
               <textarea className="form-control" rows={2} value={liveForm.description} onChange={(e) => setLiveForm({ ...liveForm, description: e.target.value })} />
             </div>
             <div className="form-group">
-              <label>Scheduled At</label>
+              <label>Scheduled At (your local time)</label>
               <input type="datetime-local" className="form-control" value={liveForm.scheduledAt} onChange={(e) => setLiveForm({ ...liveForm, scheduledAt: e.target.value })} required />
+              <small style={{ color: 'var(--text-muted)' }}>Shown to students in their local timezone after save.</small>
             </div>
             <div className="form-group">
               <label>Meeting URL</label>
@@ -391,7 +419,7 @@ export default function TeacherDashboard() {
                     {lc.isPremium && <span className="badge badge-warning" style={{ marginLeft: '0.5rem' }}>Premium</span>}
                   </td>
                   <td>{lc.course?.title}</td>
-                  <td>{new Date(lc.scheduledAt).toLocaleString()}</td>
+                  <td>{formatAppDateTime(lc.scheduledAt)}</td>
                   <td>
                     <span className={`badge ${lc.status === 'LIVE' ? 'badge-danger' : lc.status === 'COMPLETED' ? 'badge-success' : 'badge-primary'}`}>
                       {lc.status}

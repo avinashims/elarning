@@ -43,6 +43,7 @@ api.interceptors.response.use(
 
     const isAuthRoute = originalRequest.url?.includes('/auth/login')
       || originalRequest.url?.includes('/auth/register')
+      || originalRequest.url?.includes('/auth/google')
       || originalRequest.url?.includes('/auth/refresh');
 
     if (isAuthRoute) {

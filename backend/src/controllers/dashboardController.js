@@ -86,4 +86,15 @@ const getTeacherStats = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { getDashboardStats, getUsers, updateUserRole, getTeacherStats };
+const getAdminCourses = asyncHandler(async (req, res) => {
+  const courses = await prisma.course.findMany({
+    include: {
+      teacher: { select: { id: true, name: true, email: true } },
+      _count: { select: { enrollments: true, chapters: true } },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+  sendSuccess(res, courses);
+});
+
+module.exports = { getDashboardStats, getUsers, updateUserRole, getTeacherStats, getAdminCourses };

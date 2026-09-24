@@ -5,17 +5,37 @@ import {
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/Button';
 import { colors, spacing } from '../constants/theme';
+import { resetToMainApp } from '../navigation/navigationHelpers';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
+
+  const finishAuth = (userData) => {
+    const tab = userData.role === 'TEACHER' || userData.role === 'ADMIN' ? 'Profile' : 'Learning';
+    resetToMainApp(navigation, tab);
+    return userData;
+  };
+
+  const handleGoogleSignIn = async (idToken) => {
+    const userData = await loginWithGoogle(idToken, 'STUDENT');
+    finishAuth(userData);
+    return userData;
+  };
 
   const handleLogin = async () => {
+    if (!email.trim() || !password) {
+      Alert.alert('Missing details', 'Enter email and password.');
+      return;
+    }
     setLoading(true);
     try {
-      await login(email.trim(), password);
+      const userData = await login(email.trim(), password);
+      const tab = userData.role === 'TEACHER' || userData.role === 'ADMIN' ? 'Profile' : 'Learning';
+      resetToMainApp(navigation, tab);
     } catch (err) {
       Alert.alert('Login failed', err.response?.data?.message || 'Invalid credentials');
     } finally {
@@ -54,6 +74,8 @@ export default function LoginScreen({ navigation }) {
         />
 
         <Button title="Sign In" onPress={handleLogin} loading={loading} style={styles.btn} />
+
+        <GoogleSignInButton onSuccess={handleGoogleSignIn} style={{ marginTop: spacing.sm }} />
 
         <Text style={styles.footer}>
           Don't have an account?{' '}

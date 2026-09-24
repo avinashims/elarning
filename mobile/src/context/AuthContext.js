@@ -46,6 +46,14 @@ export function AuthProvider({ children }) {
     return userData;
   }, []);
 
+  const loginWithGoogle = useCallback(async (idToken, role = 'STUDENT') => {
+    const res = await api.post('/auth/google', { idToken, role });
+    const { user: userData, accessToken, refreshToken } = res.data.data;
+    await storeAuth({ user: userData, accessToken, refreshToken });
+    setUser(userData);
+    return userData;
+  }, []);
+
   const logout = useCallback(async () => {
     const refreshToken = await getRefreshToken();
     try {
@@ -67,6 +75,7 @@ export function AuthProvider({ children }) {
         loading,
         login,
         register,
+        loginWithGoogle,
         logout,
         isAuthenticated: !!user,
         isAdmin: user?.role === 'ADMIN',

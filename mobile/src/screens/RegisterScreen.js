@@ -5,6 +5,8 @@ import {
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/Button';
 import { colors, spacing } from '../constants/theme';
+import { resetToMainApp } from '../navigation/navigationHelpers';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 
 function registrationErrorMessage(err) {
   const data = err.response?.data;
@@ -17,7 +19,19 @@ function registrationErrorMessage(err) {
 export default function RegisterScreen({ navigation }) {
   const [form, setForm] = useState({ name: '', email: '', password: '', role: 'STUDENT' });
   const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
+
+  const finishAuth = (userData) => {
+    const tab = userData.role === 'TEACHER' ? 'Profile' : 'Learning';
+    resetToMainApp(navigation, tab);
+    return userData;
+  };
+
+  const handleGoogleSignIn = async (idToken) => {
+    const userData = await loginWithGoogle(idToken, form.role);
+    finishAuth(userData);
+    return userData;
+  };
 
   const handleRegister = async () => {
     if (!form.name.trim() || !form.email.trim() || !form.password) {
@@ -26,7 +40,9 @@ export default function RegisterScreen({ navigation }) {
     }
     setLoading(true);
     try {
-      await register(form.name.trim(), form.email.trim(), form.password, form.role);
+      const userData = await register(form.name.trim(), form.email.trim(), form.password, form.role);
+      const tab = userData.role === 'TEACHER' ? 'Profile' : 'Learning';
+      resetToMainApp(navigation, tab);
     } catch (err) {
       Alert.alert('Registration failed', registrationErrorMessage(err));
     } finally {
@@ -81,6 +97,8 @@ export default function RegisterScreen({ navigation }) {
         ))}
 
         <Button title="Create Account" onPress={handleRegister} loading={loading} style={styles.btn} />
+
+        <GoogleSignInButton onSuccess={handleGoogleSignIn} role={form.role} style={{ marginTop: spacing.sm }} />
 
         <Text style={styles.footer}>
           Already have an account?{' '}

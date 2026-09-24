@@ -15,7 +15,9 @@
       },
       "env": {
         "EAS_BUILD_NO_EXPO_GO_WARNING": "true",
-        "EXPO_PUBLIC_API_URL": "http://165.22.209.200:9001/api"
+        "EXPO_PUBLIC_API_URL": "http://165.22.209.200:9001/api",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "",
+        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": ""
       }
     },
     "production": {
@@ -25,7 +27,9 @@
       },
       "env": {
         "EAS_BUILD_NO_EXPO_GO_WARNING": "true",
-        "EXPO_PUBLIC_API_URL": "http://165.22.209.200:9001/api"
+        "EXPO_PUBLIC_API_URL": "http://165.22.209.200:9001/api",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "",
+        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": ""
       }
     },
     "production-store": {
@@ -35,7 +39,9 @@
       },
       "env": {
         "EAS_BUILD_NO_EXPO_GO_WARNING": "true",
-        "EXPO_PUBLIC_API_URL": "http://165.22.209.200:9001/api"
+        "EXPO_PUBLIC_API_URL": "http://165.22.209.200:9001/api",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "",
+        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": ""
       }
     }
   },

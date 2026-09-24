@@ -8,7 +8,8 @@ const getLiveClasses = asyncHandler(async (req, res) => {
 });
 
 const getUpcomingLiveClasses = asyncHandler(async (req, res) => {
-  const classes = await liveClassService.getUpcomingLiveClasses();
+  const { courseId } = req.query;
+  const classes = await liveClassService.getUpcomingLiveClasses({ courseId });
   sendSuccess(res, classes);
 });
 

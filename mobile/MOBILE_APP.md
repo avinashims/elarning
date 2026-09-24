@@ -60,6 +60,18 @@ A QR code appears in the terminal.
 - Email: `student@elearning.com`
 - Password: `student123`
 
+### Google Sign-In (optional)
+
+1. In [Google Cloud Console](https://console.cloud.google.com/apis/credentials), create:
+   - **Web** OAuth client (for backend token verification and Expo `webClientId`)
+   - **Android** OAuth client: package `com.aviskillstream.app`, SHA-1 from EAS (`eas credentials -p android`)
+2. On the server, set `GOOGLE_CLIENT_IDS` in `deploy/.env.production` to **both** client IDs (comma-separated).
+3. Run `npx prisma db push` in the API container after pulling (adds optional `googleId` on users).
+4. For APK builds, set in `mobile/eas.json` (or EAS secrets):
+   - `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`
+   - `EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID`
+5. Rebuild APK (`npm run build:apk`). The **Continue with Google** button appears only when both IDs are set.
+
 ---
 
 ## Method 2: Install APK (standalone app — no Expo Go)

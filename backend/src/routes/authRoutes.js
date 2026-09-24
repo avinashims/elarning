@@ -2,6 +2,7 @@ const express = require('express');
 const {
   register,
   login,
+  googleSignIn,
   refresh,
   logout,
   getProfile,
@@ -15,12 +16,14 @@ const {
   refreshValidation,
   logoutValidation,
   updateProfileValidation,
+  googleSignInValidation,
 } = require('../validators/authValidators');
 
 const router = express.Router();
 
 router.post('/register', registerValidation, validate, register);
 router.post('/login', loginValidation, validate, login);
+router.post('/google', googleSignInValidation, validate, googleSignIn);
 router.post('/refresh', refreshValidation, validate, refresh);
 router.post('/logout', logoutValidation, validate, logout);
 router.get('/profile', authenticate, getProfile);

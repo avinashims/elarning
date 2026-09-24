@@ -63,10 +63,23 @@ const updateProfileValidation = [
     .withMessage('Avatar must be a valid URL'),
 ];
 
+const googleSignInValidation = [
+  body('idToken')
+    .notEmpty()
+    .withMessage('Google idToken is required')
+    .isString()
+    .withMessage('idToken must be a string'),
+  body('role')
+    .optional()
+    .isIn(REGISTERABLE_ROLES)
+    .withMessage(`Role must be one of: ${REGISTERABLE_ROLES.join(', ')}`),
+];
+
 module.exports = {
   registerValidation,
   loginValidation,
   refreshValidation,
   logoutValidation,
   updateProfileValidation,
+  googleSignInValidation,
 };

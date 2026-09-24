@@ -3,11 +3,23 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
+import { formatAppDateTime } from '../utils/dateTime';
 import './CourseDetail.css';
 
 function formatPrice(price) {
   if (!price || price === 0) return 'Free';
   return `₹${price.toLocaleString('en-IN')}`;
+}
+
+/** First lesson the learner can open (skips locked premium without access). */
+function findFirstLesson(course, isOwned) {
+  for (const chapter of course.chapters || []) {
+    for (const lesson of chapter.lessons || []) {
+      if (lesson.locked && !isOwned) continue;
+      if (lesson.id) return lesson;
+    }
+  }
+  return null;
 }
 
 function loadRazorpay() {
@@ -33,8 +45,13 @@ export default function CourseDetail() {
   const [actionLoading, setActionLoading] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
+  const [loadError, setLoadError] = useState('');
+  const [liveClasses, setLiveClasses] = useState([]);
+  const [liveJoining, setLiveJoining] = useState(null);
+  const [liveJoinError, setLiveJoinError] = useState('');
 
   useEffect(() => {
+    setLoadError('');
     Promise.all([
       api.get(`/courses/${id}`),
       api.get(`/reviews/courses/${id}`).catch(() => ({ data: { data: [] } })),
@@ -49,9 +66,95 @@ export default function CourseDetail() {
           setWishlisted(wishlistRes.data.data.some((w) => w.courseId === id || w.course?.id === id));
         }
       })
-      .catch(console.error)
+      .catch((err) => {
+        setCourse(null);
+        setLoadError(err.response?.data?.message || 'Course not found');
+      })
       .finally(() => setLoading(false));
   }, [id, user]);
+
+  useEffect(() => {
+    const applyList = (list) => {
+      const filtered = (list || []).filter(
+        (lc) => lc.course?.id === id || lc.courseId === id
+      );
+      setLiveClasses(filtered);
+    };
+
+    api.get('/live-classes/upcoming', { params: { courseId: id } })
+      .then((res) => applyList(res.data.data))
+      .catch(() => {
+        api.get('/live-classes/upcoming')
+          .then((res) => applyList(res.data.data))
+          .catch(() => setLiveClasses([]));
+      });
+  }, [id]);
+
+  const handleJoinLive = async (cls) => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    setLiveJoining(cls.id);
+    setLiveJoinError('');
+    try {
+      const res = await api.get(`/live-classes/${cls.id}/join`);
+      const { meetingUrl, liveStreamId } = res.data.data;
+      const url = meetingUrl || (liveStreamId ? `https://stream.example.com/${liveStreamId}` : null);
+      if (url) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      } else {
+        setLiveJoinError('No meeting link set for this class. Ask your instructor to add a Google Meet URL.');
+      }
+    } catch (err) {
+      setLiveJoinError(err.response?.data?.message || 'Unable to join this class');
+    } finally {
+      setLiveJoining(null);
+    }
+  };
+
+  const activeLive = liveClasses.find((lc) => lc.status === 'LIVE');
+
+  const renderLiveSessions = (compact = false) => (
+    <div className={compact ? 'course-live-panel compact' : 'course-live-panel'}>
+      {liveClasses.length === 0 ? (
+        <p className="course-live-empty">
+          No live class is scheduled for <strong>{course?.title}</strong> yet.
+          {' '}Your instructor adds one from the{' '}
+          <Link to="/teacher">teacher dashboard</Link> (Schedule Live Class → pick this course → Google Meet link).
+          {' '}You can also open{' '}
+          <Link to="/live-classes">Live classes</Link> in the top menu.
+        </p>
+      ) : (
+        liveClasses.map((cls) => (
+          <div key={cls.id} className="course-live-item">
+            <div className="course-live-item-head">
+              <strong>{cls.title}</strong>
+              <span className={`badge ${cls.status === 'LIVE' ? 'badge-danger' : 'badge-primary'}`}>
+                {cls.status === 'LIVE' ? 'LIVE NOW' : cls.status}
+              </span>
+            </div>
+            <p className="course-live-time">{formatAppDateTime(cls.scheduledAt)}</p>
+            {(cls.status === 'LIVE' || cls.status === 'SCHEDULED') && (
+              <button
+                type="button"
+                className={`btn btn-sm ${cls.status === 'LIVE' ? 'btn-primary' : 'btn-secondary'}`}
+                style={{ marginTop: '0.5rem', width: compact ? '100%' : 'auto' }}
+                disabled={liveJoining === cls.id}
+                onClick={() => handleJoinLive(cls)}
+              >
+                {liveJoining === cls.id
+                  ? 'Opening meet...'
+                  : cls.status === 'LIVE'
+                    ? 'Join live (Google Meet / Zoom)'
+                    : 'Join when ready'}
+              </button>
+            )}
+          </div>
+        ))
+      )}
+    </div>
+  );
 
   const handleEnroll = async () => {
     if (!user) { navigate('/login'); return; }
@@ -145,12 +248,26 @@ export default function CourseDetail() {
   };
 
   if (loading) return <div className="loading container">Loading...</div>;
-  if (!course) return <div className="container"><div className="alert alert-error">Course not found</div></div>;
+  if (!course) {
+    return (
+      <div className="container" style={{ paddingTop: '2rem' }}>
+        <div className="alert alert-error">{loadError || 'Course not found'}</div>
+        <p style={{ color: 'var(--text-muted)', marginTop: '1rem' }}>
+          This course may have been deleted, is still a draft, or the link is outdated.
+          To join a live session, use <Link to="/live-classes">Live classes</Link> — not the course page URL.
+        </p>
+        <Link to="/courses" className="btn btn-primary" style={{ marginTop: '1rem', display: 'inline-block' }}>
+          Browse courses
+        </Link>
+      </div>
+    );
+  }
 
   const totalLessons = course.chapters?.reduce((n, ch) => n + (ch.lessons?.length || 0), 0) || 0;
   const rating = course.rating || { average: 0, count: 0 };
   const isFree = !course.price || course.price === 0;
   const isOwned = course.isOwned || course.isEnrolled;
+  const firstLesson = findFirstLesson(course, isOwned);
 
   return (
     <div className="course-detail-page">
@@ -186,22 +303,48 @@ export default function CourseDetail() {
               <span>{progress.stats.progressPercent}% complete</span>
             </div>
           )}
+          {activeLive && (
+            <div className="course-live-hero-banner">
+              <span>🔴 Live class in progress — {activeLive.title}</span>
+              <button
+                type="button"
+                className="btn btn-sm btn-primary"
+                onClick={() => handleJoinLive(activeLive)}
+                disabled={liveJoining === activeLive.id}
+              >
+                {liveJoining === activeLive.id ? 'Opening...' : 'Join now'}
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
       <div className="container course-body">
         <div className="course-main">
           <div className="course-tabs">
-            {['overview', 'curriculum', 'instructor', 'reviews'].map((t) => (
+            {['overview', 'curriculum', 'live', 'instructor', 'reviews'].map((t) => (
               <button key={t} className={tab === t ? 'active' : ''} onClick={() => setTab(t)}>
-                {t.charAt(0).toUpperCase() + t.slice(1)}
+                {t === 'live' ? (
+                  <>
+                    Live
+                    {activeLive && <span className="badge badge-danger" style={{ marginLeft: '0.35rem', fontSize: '0.65rem' }}>ON AIR</span>}
+                  </>
+                ) : (
+                  t.charAt(0).toUpperCase() + t.slice(1)
+                )}
               </button>
             ))}
           </div>
 
+          {liveJoinError && (
+            <div className="alert alert-error" style={{ marginBottom: '1rem' }}>{liveJoinError}</div>
+          )}
+
           {tab === 'overview' && (
             <div className="tab-content">
-              <h2>What you'll learn</h2>
+              <h2>Live sessions</h2>
+              {renderLiveSessions()}
+              <h2 style={{ marginTop: '2rem' }}>What you'll learn</h2>
               {course.learningObjectives?.length > 0 ? (
                 <ul className="objectives-grid">
                   {course.learningObjectives.map((obj, i) => (
@@ -232,6 +375,16 @@ export default function CourseDetail() {
 
               <h2>Description</h2>
               <p className="course-description">{course.description}</p>
+            </div>
+          )}
+
+          {tab === 'live' && (
+            <div className="tab-content">
+              <h2>Live classes</h2>
+              <p className="muted" style={{ marginBottom: '1rem' }}>
+                Join opens your instructor&apos;s meeting link in a new tab. The teacher must click <strong>Start</strong> on the teacher dashboard.
+              </p>
+              {renderLiveSessions()}
             </div>
           )}
 
@@ -345,9 +498,26 @@ export default function CourseDetail() {
             </div>
 
             {isOwned ? (
-              <Link to={`/lessons/${course.chapters?.[0]?.lessons?.[0]?.id}`} className="btn btn-primary" style={{ width: '100%', marginBottom: '0.75rem', textAlign: 'center' }}>
-                Go to course
-              </Link>
+              <>
+                {firstLesson ? (
+                  <Link
+                    to={`/lessons/${firstLesson.id}`}
+                    className="btn btn-primary"
+                    style={{ width: '100%', marginBottom: '0.75rem', textAlign: 'center' }}
+                  >
+                    Go to course
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    style={{ width: '100%', marginBottom: '0.75rem' }}
+                    onClick={() => setTab(isOwned ? 'live' : 'curriculum')}
+                  >
+                    {totalLessons === 0 ? 'View course (no videos yet)' : 'Open curriculum'}
+                  </button>
+                )}
+              </>
             ) : isFree ? (
               <button onClick={handleEnroll} className="btn btn-primary" style={{ width: '100%', marginBottom: '0.75rem' }} disabled={actionLoading}>
                 {actionLoading ? 'Processing...' : 'Enroll now'}
@@ -366,6 +536,9 @@ export default function CourseDetail() {
             <button onClick={handleWishlist} className="btn btn-secondary" style={{ width: '100%', marginBottom: '0.75rem' }}>
               {wishlisted ? '♥ Saved' : '♡ Save for later'}
             </button>
+
+            <h4 className="sidebar-live-heading">📺 Live sessions</h4>
+            {renderLiveSessions(true)}
 
             <ul className="sidebar-features">
               <li>Full lifetime access</li>

@@ -36,7 +36,7 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    const isAuthRoute = ['/auth/login', '/auth/register', '/auth/refresh'].some(
+    const isAuthRoute = ['/auth/login', '/auth/register', '/auth/google', '/auth/refresh'].some(
       (path) => originalRequest.url?.includes(path)
     );
 

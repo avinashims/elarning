@@ -112,17 +112,21 @@ async function endLiveClass(id, teacherId, userRole, { recordingUrl } = {}) {
   return updated;
 }
 
-async function getUpcomingLiveClasses() {
+async function getUpcomingLiveClasses(filters = {}) {
   const now = new Date();
+  const { courseId } = filters;
+
+  const where = {
+    status: { in: ['SCHEDULED', 'LIVE'] },
+    OR: [{ status: 'LIVE' }, { scheduledAt: { gte: now } }],
+  };
+  if (courseId) where.courseId = courseId;
 
   return prisma.liveClass.findMany({
-    where: {
-      status: { in: ['SCHEDULED', 'LIVE'] },
-      OR: [{ status: 'LIVE' }, { scheduledAt: { gte: now } }],
-    },
+    where,
     include: liveClassInclude,
     orderBy: { scheduledAt: 'asc' },
-    take: 20,
+    take: courseId ? 10 : 20,
   });
 }
 

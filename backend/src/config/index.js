@@ -26,5 +26,11 @@ module.exports = {
     signingSecret: process.env.VIDEO_SIGNING_SECRET || 'dev-video-signing-secret-change-me',
     urlExpirySeconds: parseInt(process.env.VIDEO_URL_EXPIRY_SECONDS || '900', 10),
   },
+  google: {
+    clientIds: (process.env.GOOGLE_CLIENT_IDS || process.env.GOOGLE_CLIENT_ID || '')
+      .split(',')
+      .map((id) => id.trim())
+      .filter(Boolean),
+  },
   uploadsPath: path.resolve(process.env.UPLOADS_PATH || path.join(__dirname, '../../uploads')),
 };
