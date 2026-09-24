@@ -14,10 +14,10 @@ export function datetimeLocalToIso(value) {
 export function formatAppDateTime(isoOrDate) {
   const date = isoOrDate instanceof Date ? isoOrDate : new Date(isoOrDate);
   if (Number.isNaN(date.getTime())) return '—';
+  // dateStyle + timeStyle cannot be combined with timeZoneName (throws RangeError in Chrome)
   return date.toLocaleString(undefined, {
     dateStyle: 'medium',
     timeStyle: 'short',
-    timeZoneName: 'short',
   });
 }
 
