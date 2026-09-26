@@ -49,6 +49,11 @@ const createCourseValidation = [
     .optional()
     .isUUID()
     .withMessage('teacherId must be a valid UUID'),
+  body('examTrack').optional().trim().isLength({ max: 50 }),
+  body('classLevel').optional().trim().isLength({ max: 50 }),
+  body('targetExamYear').optional().trim().isLength({ max: 20 }),
+  body('medium').optional().trim().isLength({ max: 30 }),
+  body('batchFeatures').optional().isArray(),
 ];
 
 const updateCourseValidation = [
@@ -90,6 +95,11 @@ const updateCourseValidation = [
     .optional()
     .isUUID()
     .withMessage('teacherId must be a valid UUID'),
+  body('examTrack').optional().trim().isLength({ max: 50 }),
+  body('classLevel').optional().trim().isLength({ max: 50 }),
+  body('targetExamYear').optional().trim().isLength({ max: 20 }),
+  body('medium').optional().trim().isLength({ max: 30 }),
+  body('batchFeatures').optional().isArray(),
 ];
 
 module.exports = {

@@ -1,4 +1,5 @@
 const prisma = require('../config/database');
+const { DEFAULT_BATCH_FEATURES } = require('../constants/examTracks');
 const { AppError } = require('../utils/helpers');
 const { cacheGet, cacheSet, cacheDel } = require('./cacheService');
 const { canAccessPremiumContent } = require('./subscriptionService');
@@ -55,10 +56,11 @@ async function attachRatingStats(courses) {
 }
 
 async function getPublishedCourses(filters = {}) {
-  const { category, level, q, sort, minPrice, maxPrice } = filters;
+  const { category, level, q, sort, minPrice, maxPrice, examTrack } = filters;
 
   const where = { isPublished: true };
   if (category) where.category = { slug: category };
+  if (examTrack) where.examTrack = { equals: examTrack, mode: 'insensitive' };
   if (level) where.level = level;
   if (q) {
     where.OR = [
@@ -153,6 +155,11 @@ async function createCourse(data, user) {
       requirements: data.requirements ?? [],
       targetAudience: data.targetAudience ?? [],
       categoryId: data.categoryId,
+      examTrack: data.examTrack,
+      classLevel: data.classLevel,
+      targetExamYear: data.targetExamYear,
+      medium: data.medium ?? 'Hindi',
+      batchFeatures: data.batchFeatures?.length ? data.batchFeatures : DEFAULT_BATCH_FEATURES,
       teacherId: resolvedTeacherId,
       isPublished: data.isPublished ?? false,
     },
@@ -174,6 +181,7 @@ async function updateCourse(id, data, user) {
     'title', 'subtitle', 'description', 'thumbnail', 'isPublished',
     'price', 'originalPrice', 'level', 'language', 'learningObjectives',
     'requirements', 'targetAudience', 'categoryId',
+    'examTrack', 'classLevel', 'targetExamYear', 'medium', 'batchFeatures',
   ];
   if (user.role === 'ADMIN') allowedFields.push('teacherId');
 
@@ -250,4 +258,5 @@ module.exports = {
   deleteCourse,
   enrollCourse,
   getMyCourses,
+  attachRatingStats,
 };

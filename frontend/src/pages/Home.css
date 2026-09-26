@@ -66,8 +66,122 @@
   width: 100%;
   max-width: 400px;
   aspect-ratio: 1;
-  background: linear-gradient(135deg, #5624d0 0%, #a435f0 50%, #eceb98 100%);
   border: 1px solid var(--border);
+}
+
+.hero-pw {
+  background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 50%, #fff 100%);
+}
+
+.hero-kicker {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.5rem;
+}
+
+.stats-strip {
+  padding: 1.25rem 0 2rem;
+}
+
+.stats-strip-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--border);
+  background: var(--bg-section);
+}
+
+.stat-pill {
+  display: flex;
+  flex-direction: column;
+  min-width: 100px;
+}
+
+.stat-pill strong {
+  font-size: 1.5rem;
+  color: var(--primary);
+}
+
+.stat-pill span {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.exam-tracks {
+  padding: 0 0 3rem;
+}
+
+.exam-track-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.exam-track-card {
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.exam-track-card:hover {
+  border-color: var(--primary-light);
+  box-shadow: var(--shadow);
+}
+
+.exam-track-icon {
+  font-size: 1.75rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.exam-track-card h3 {
+  font-size: 1rem;
+  margin-bottom: 0.35rem;
+}
+
+.exam-track-card p {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.live-today {
+  padding-bottom: 3rem;
+}
+
+.live-list {
+  list-style: none;
+  border: 1px solid var(--border);
+}
+
+.live-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.live-list li:last-child {
+  border-bottom: none;
+}
+
+.live-meta {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+.hero-illustration {
+  background: linear-gradient(135deg, #4338ca 0%, #7c3aed 50%, #c4b5fd 100%);
 }
 
 .categories {

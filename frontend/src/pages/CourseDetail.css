@@ -23,6 +23,29 @@
   max-width: 700px;
 }
 
+.course-subtitle {
+  color: #cec0fc;
+  margin-bottom: 0.75rem;
+}
+
+.course-batch-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.batch-features-list {
+  list-style: none;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  color: #d1d7dc;
+}
+
+.batch-features-list li {
+  margin-bottom: 0.35rem;
+}
+
 .course-hero-meta {
   display: flex;
   flex-wrap: wrap;

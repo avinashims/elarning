@@ -40,6 +40,22 @@
   padding: 0.5rem 0;
 }
 
+.course-batch-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-bottom: 0.35rem;
+}
+
+.badge-outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  padding: 0.15rem 0.4rem;
+  font-weight: 600;
+}
+
 .course-card-body h3 {
   font-size: 0.9375rem;
   font-weight: 700;

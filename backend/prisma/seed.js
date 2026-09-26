@@ -76,12 +76,21 @@ async function main() {
   });
 
   const categories = [
+    { id: 'cat-jee', name: 'IIT JEE', slug: 'iit-jee', icon: '🎯' },
+    { id: 'cat-neet', name: 'NEET', slug: 'neet', icon: '🩺' },
+    { id: 'cat-ssc', name: 'SSC & Govt', slug: 'ssc', icon: '📋' },
+    { id: 'cat-cbse', name: 'CBSE', slug: 'cbse', icon: '📚' },
+    { id: 'cat-upsc', name: 'UPSC', slug: 'upsc', icon: '🏛️' },
+    { id: 'cat-gate', name: 'GATE', slug: 'gate', icon: '⚙️' },
     { id: 'cat-dev', name: 'Development', slug: 'development', icon: '💻' },
     { id: 'cat-business', name: 'Business', slug: 'business', icon: '📊' },
-    { id: 'cat-design', name: 'Design', slug: 'design', icon: '🎨' },
-    { id: 'cat-marketing', name: 'Marketing', slug: 'marketing', icon: '📣' },
-    { id: 'cat-it', name: 'IT & Software', slug: 'it-software', icon: '🖥️' },
-    { id: 'cat-personal', name: 'Personal Development', slug: 'personal-development', icon: '🌱' },
+  ];
+
+  const batchFeaturesDefault = [
+    'Live interactive classes',
+    'Recorded lectures',
+    'DPP & practice sheets',
+    'Mock tests & analytics',
   ];
 
   for (const cat of categories) {
@@ -94,7 +103,13 @@ async function main() {
 
   const course = await prisma.course.upsert({
     where: { id: 'course-web-dev' },
-    update: {},
+    update: {
+      examTrack: 'IIT-JEE',
+      classLevel: 'Dropper',
+      targetExamYear: '2027',
+      medium: 'English',
+      batchFeatures: batchFeaturesDefault,
+    },
     create: {
       id: 'course-web-dev',
       title: 'Complete Web Development Bootcamp',
@@ -116,6 +131,77 @@ async function main() {
       isPublished: true,
       teacherId: teacher.id,
       categoryId: 'cat-dev',
+      examTrack: 'IIT-JEE',
+      classLevel: 'Dropper',
+      targetExamYear: '2027',
+      medium: 'English',
+      batchFeatures: batchFeaturesDefault,
+    },
+  });
+
+  await prisma.course.upsert({
+    where: { id: 'course-ssc-batch' },
+    update: {
+      examTrack: 'SSC',
+      classLevel: 'Tier 1',
+      targetExamYear: '2026',
+      medium: 'Hindi',
+      batchFeatures: batchFeaturesDefault,
+    },
+    create: {
+      id: 'course-ssc-batch',
+      title: 'SSC CGL Complete Batch 2026',
+      subtitle: 'Live classes, DPP, mock tests & previous year questions',
+      description: 'Prepare for SSC CGL with structured live batches, recorded revision, and weekly mock tests.',
+      thumbnail: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800',
+      price: 0,
+      originalPrice: 4999,
+      level: 'ALL_LEVELS',
+      language: 'Hindi',
+      learningObjectives: ['Complete SSC syllabus coverage', 'Weekly mock tests', 'Doubt solving sessions'],
+      requirements: ['Basic aptitude'],
+      targetAudience: ['SSC CGL aspirants'],
+      isPublished: true,
+      teacherId: teacher.id,
+      categoryId: 'cat-ssc',
+      examTrack: 'SSC',
+      classLevel: 'Tier 1',
+      targetExamYear: '2026',
+      medium: 'Hindi',
+      batchFeatures: batchFeaturesDefault,
+    },
+  });
+
+  await prisma.course.upsert({
+    where: { id: 'course-neet-batch' },
+    update: {
+      examTrack: 'NEET',
+      classLevel: 'Class 12',
+      targetExamYear: '2027',
+      medium: 'Hinglish',
+      batchFeatures: batchFeaturesDefault,
+    },
+    create: {
+      id: 'course-neet-batch',
+      title: 'NEET UG Arjuna Batch 2027',
+      subtitle: 'Class 12 + droppers | Live + recorded | AITS included',
+      description: 'NEET-focused batch with live classes, recorded lectures, DPP, and all-India test series.',
+      thumbnail: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800',
+      price: 2999,
+      originalPrice: 8999,
+      level: 'ADVANCED',
+      language: 'Hinglish',
+      learningObjectives: ['NCERT + advanced MCQs', 'Live doubt solving', 'Full syllabus mock tests'],
+      requirements: ['Class 11/12 or dropper'],
+      targetAudience: ['NEET aspirants'],
+      isPublished: true,
+      teacherId: teacher.id,
+      categoryId: 'cat-neet',
+      examTrack: 'NEET',
+      classLevel: 'Class 12',
+      targetExamYear: '2027',
+      medium: 'Hinglish',
+      batchFeatures: batchFeaturesDefault,
     },
   });
 
@@ -303,6 +389,52 @@ async function main() {
     where: { userId_courseId: { userId: student.id, courseId: course.id } },
     update: {},
     create: { userId: student.id, courseId: course.id },
+  });
+
+  await prisma.testSeries.upsert({
+    where: { id: 'test-ssc-mock-1' },
+    update: {},
+    create: {
+      id: 'test-ssc-mock-1',
+      title: 'SSC CGL Full Length Mock Test 01',
+      description: '100 questions | 60 minutes | All sections',
+      examTrack: 'SSC',
+      durationMinutes: 60,
+      totalQuestions: 100,
+      price: 0,
+      isPublished: true,
+    },
+  });
+
+  await prisma.testSeries.upsert({
+    where: { id: 'test-neet-aits-1' },
+    update: {},
+    create: {
+      id: 'test-neet-aits-1',
+      title: 'NEET All India Test Series - Paper 1',
+      description: '180 questions | 3 hours | NEET pattern',
+      examTrack: 'NEET',
+      durationMinutes: 180,
+      totalQuestions: 180,
+      price: 499,
+      isPublished: true,
+      courseId: 'course-neet-batch',
+    },
+  });
+
+  await prisma.testSeries.upsert({
+    where: { id: 'test-jee-mock-1' },
+    update: {},
+    create: {
+      id: 'test-jee-mock-1',
+      title: 'JEE Main Mock Test - Physics & Chemistry',
+      description: 'Sectional mock for Main 2027',
+      examTrack: 'IIT-JEE',
+      durationMinutes: 120,
+      totalQuestions: 75,
+      price: 199,
+      isPublished: true,
+    },
   });
 
   console.log('Seed completed!');

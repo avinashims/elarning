@@ -1,11 +1,11 @@
 {
-  "name": "Udemy - Online Courses",
-  "short_name": "Udemy",
-  "description": "Learn online with courses, live classes, and expert instructors",
+  "name": "Avi SkillStream",
+  "short_name": "SkillStream",
+  "description": "Live batches, test series, and exam prep",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#5624d0",
+  "theme_color": "#4338ca",
   "orientation": "portrait-primary",
   "icons": [
     {

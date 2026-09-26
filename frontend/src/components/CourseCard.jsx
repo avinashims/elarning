@@ -22,6 +22,13 @@ export default function CourseCard({ course, compact }) {
         )}
       </div>
       <div className="course-card-body">
+        {(course.examTrack || course.classLevel || course.targetExamYear) && (
+          <div className="course-batch-badges">
+            {course.examTrack && <span className="badge badge-primary">{course.examTrack}</span>}
+            {course.classLevel && <span className="badge badge-secondary">{course.classLevel}</span>}
+            {course.targetExamYear && <span className="badge badge-outline">{course.targetExamYear}</span>}
+          </div>
+        )}
         <h3>{course.title}</h3>
         {course.teacher && <p className="instructor">{course.teacher.name}</p>}
         <div className="course-card-rating">

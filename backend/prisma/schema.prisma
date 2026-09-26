@@ -110,6 +110,11 @@ model Course {
   isPublished         Boolean     @default(false)
   teacherId           String
   categoryId          String?
+  examTrack           String?
+  classLevel          String?
+  targetExamYear      String?
+  medium              String      @default("Hindi")
+  batchFeatures       String[]
   createdAt           DateTime    @default(now())
   updatedAt           DateTime    @updatedAt
 
@@ -122,8 +127,27 @@ model Course {
   wishlist        Wishlist[]
   cartItems       CartItem[]
   coursePurchases CoursePurchase[]
+  testSeries      TestSeries[]
 
   @@map("courses")
+}
+
+model TestSeries {
+  id              String   @id @default(uuid())
+  title           String
+  description     String?
+  examTrack       String
+  durationMinutes Int      @default(180)
+  totalQuestions  Int      @default(100)
+  price           Int      @default(0)
+  isPublished     Boolean  @default(true)
+  courseId        String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  course Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)
+
+  @@map("test_series")
 }
 
 model Chapter {

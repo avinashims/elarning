@@ -3,44 +3,57 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import CourseCard from '../components/CourseCard';
+import { formatAppDateTime } from '../utils/dateTime';
 import './Home.css';
+
+const TRACK_TO_FILTER = {
+  'iit-jee': 'IIT-JEE',
+  neet: 'NEET',
+  ssc: 'SSC',
+  cbse: 'CBSE',
+  upsc: 'UPSC',
+  gate: 'GATE',
+};
 
 export default function Home() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
-  const [courses, setCourses] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [platform, setPlatform] = useState(null);
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
-    Promise.all([
-      api.get('/courses').then((res) => res.data.data.slice(0, 4)),
-      api.get('/categories').then((res) => res.data.data),
-    ]).then(([courseData, catData]) => {
-      setCourses(courseData);
-      setCategories(catData);
-    }).catch(console.error);
+    api.get('/platform/home')
+      .then((res) => setPlatform(res.data.data))
+      .catch((err) => {
+        setLoadError(err.response?.data?.message || 'Could not load home');
+      });
   }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    navigate(`/courses?q=${encodeURIComponent(search.trim())}`);
+    navigate(`/batches?q=${encodeURIComponent(search.trim())}`);
   };
+
+  const examTracks = platform?.examTracks || [];
+  const featuredBatches = platform?.featuredBatches || [];
+  const upcomingLive = platform?.upcomingLive || [];
+  const stats = platform?.stats || {};
 
   return (
     <div className="home">
-      <section className="hero">
+      <section className="hero hero-pw">
         <div className="container hero-grid">
           <div className="hero-content">
-            <h1>Learn without limits</h1>
+            <p className="hero-kicker">Live-first exam prep</p>
+            <h1>Crack your exam with Avi SkillStream</h1>
             <p>
-              Start, switch, or advance your career with thousands of courses,
-              live classes, and expert instructors.
+              Join live batches, test series, and recorded revision — JEE, NEET, SSC, and more.
             </p>
             <form className="hero-search" onSubmit={handleSearch}>
               <input
                 type="text"
-                placeholder="What do you want to learn?"
+                placeholder="Search batches & subjects"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -48,8 +61,8 @@ export default function Home() {
             </form>
             {!user && (
               <p className="hero-cta">
-                New to Udemy?{' '}
-                <Link to="/register">Sign up today</Link>
+                New here?{' '}
+                <Link to="/register">Create free account</Link>
               </p>
             )}
           </div>
@@ -59,59 +72,94 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="categories container">
-        <h2>Top categories</h2>
-        <div className="category-grid">
-          {categories.slice(0, 6).map((cat) => (
-            <Link key={cat.id} to={`/courses?category=${cat.slug}`} className="category-card">
-              {cat.icon} {cat.name}
+      {loadError && (
+        <div className="container" style={{ paddingTop: '1rem' }}>
+          <div className="alert alert-error">{loadError}</div>
+        </div>
+      )}
+
+      <section className="stats-strip container">
+        <div className="stats-strip-inner">
+          <div className="stat-pill">
+            <strong>{stats.batches ?? '—'}</strong>
+            <span>Active batches</span>
+          </div>
+          <div className="stat-pill">
+            <strong>{stats.testSeries ?? '—'}</strong>
+            <span>Test series</span>
+          </div>
+          <div className="stat-pill">
+            <strong>{stats.liveToday ?? 0}</strong>
+            <span>Live today</span>
+          </div>
+          <Link to="/live-classes" className="btn btn-primary btn-sm">View schedule</Link>
+        </div>
+      </section>
+
+      <section className="exam-tracks container">
+        <div className="section-header">
+          <h2>Choose your exam</h2>
+          <Link to="/batches" className="see-all">All batches</Link>
+        </div>
+        <div className="exam-track-grid">
+          {examTracks.map((track) => (
+            <Link
+              key={track.slug}
+              to={`/batches?examTrack=${encodeURIComponent(TRACK_TO_FILTER[track.slug] || track.name)}`}
+              className="exam-track-card"
+            >
+              <span className="exam-track-icon">{track.icon}</span>
+              <h3>{track.name}</h3>
+              <p>{track.tagline}</p>
             </Link>
           ))}
         </div>
       </section>
 
-      {courses.length > 0 && (
+      {upcomingLive.length > 0 && (
+        <section className="live-today container">
+          <div className="section-header">
+            <h2>Upcoming live classes</h2>
+            <Link to="/live-classes" className="see-all">Full calendar</Link>
+          </div>
+          <ul className="live-list">
+            {upcomingLive.slice(0, 4).map((lc) => (
+              <li key={lc.id}>
+                <div>
+                  <strong>{lc.title}</strong>
+                  <span className="live-meta">
+                    {lc.course?.title && `${lc.course.title} · `}
+                    {formatAppDateTime(lc.scheduledAt)}
+                  </span>
+                </div>
+                {lc.status === 'LIVE' && <span className="badge badge-danger">LIVE</span>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {featuredBatches.length > 0 && (
         <section className="featured container">
           <div className="section-header">
-            <h2>Students are viewing</h2>
-            <Link to="/courses" className="see-all">See all</Link>
+            <h2>Featured batches</h2>
+            <Link to="/batches" className="see-all">See all</Link>
           </div>
           <div className="grid grid-4">
-            {courses.map((course) => (
+            {featuredBatches.slice(0, 4).map((course) => (
               <CourseCard key={course.id} course={course} compact />
             ))}
           </div>
         </section>
       )}
 
-      <section className="trust-section">
-        <div className="container trust-grid">
-          <div className="trust-item">
-            <span className="trust-num">10K+</span>
-            <span className="trust-label">Video lessons</span>
-          </div>
-          <div className="trust-item">
-            <span className="trust-num">Live</span>
-            <span className="trust-label">Interactive classes</span>
-          </div>
-          <div className="trust-item">
-            <span className="trust-num">Premium</span>
-            <span className="trust-label">Expert content</span>
-          </div>
-          <div className="trust-item">
-            <span className="trust-num">Track</span>
-            <span className="trust-label">Your progress</span>
-          </div>
-        </div>
-      </section>
-
       <section className="cta-banner">
         <div className="container cta-inner">
           <div>
-            <h2>Become an instructor</h2>
-            <p>Instructors from around the world teach millions of students on Udemy.</p>
+            <h2>Test series & mocks</h2>
+            <p>All-India tests with detailed analytics — practice like exam day.</p>
           </div>
-          <Link to="/register" className="btn btn-dark btn-lg">Get started</Link>
+          <Link to="/test-series" className="btn btn-dark btn-lg">Browse tests</Link>
         </div>
       </section>
     </div>

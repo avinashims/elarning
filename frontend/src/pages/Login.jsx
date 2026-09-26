@@ -49,7 +49,7 @@ export default function Login() {
   return (
     <div className="container auth-page">
       <div className="card auth-card">
-        <Link to="/" className="auth-brand">Udemy</Link>
+        <Link to="/" className="auth-brand">Avi SkillStream</Link>
         <h1>Log in to continue your learning journey</h1>
 
         {error && <div className="alert alert-error">{error}</div>}

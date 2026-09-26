@@ -195,7 +195,7 @@ export default function CourseDetail() {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount,
         currency: 'INR',
-        name: 'Udemy',
+        name: 'Avi SkillStream',
         description: courseData?.title || course.title,
         order_id: orderId,
         handler: async (response) => {
@@ -280,6 +280,21 @@ export default function CourseDetail() {
           )}
           <h1>{course.title}</h1>
           {course.subtitle && <p className="course-subtitle">{course.subtitle}</p>}
+          {(course.examTrack || course.classLevel || course.medium || course.targetExamYear) && (
+            <div className="course-batch-meta">
+              {course.examTrack && <span className="badge badge-primary">{course.examTrack}</span>}
+              {course.classLevel && <span className="badge badge-secondary">{course.classLevel}</span>}
+              {course.targetExamYear && <span className="badge badge-outline">Target {course.targetExamYear}</span>}
+              {course.medium && <span className="badge badge-outline">{course.medium}</span>}
+            </div>
+          )}
+          {Array.isArray(course.batchFeatures) && course.batchFeatures.length > 0 && (
+            <ul className="batch-features-list">
+              {course.batchFeatures.slice(0, 5).map((f) => (
+                <li key={f}>✓ {f}</li>
+              ))}
+            </ul>
+          )}
           <div className="course-hero-meta">
             {rating.average > 0 && (
               <>

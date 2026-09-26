@@ -10,7 +10,13 @@ const emptyCourseForm = {
   price: '0',
   originalPrice: '',
   isPublished: true,
+  examTrack: '',
+  classLevel: '',
+  targetExamYear: '',
+  medium: '',
 };
+
+const EXAM_TRACK_OPTIONS = ['', 'IIT-JEE', 'NEET', 'SSC', 'CBSE', 'UPSC', 'GATE'];
 
 function formatPrice(price) {
   if (!price || price === 0) return 'Free';
@@ -88,6 +94,10 @@ export default function TeacherDashboard() {
       price: String(course.price ?? 0),
       originalPrice: course.originalPrice != null ? String(course.originalPrice) : '',
       isPublished: course.isPublished,
+      examTrack: course.examTrack || '',
+      classLevel: course.classLevel || '',
+      targetExamYear: course.targetExamYear || '',
+      medium: course.medium || '',
     });
     setThumbnailFile(null);
     setThumbnailPreview(course.thumbnail || '');
@@ -139,6 +149,10 @@ export default function TeacherDashboard() {
         price,
         ...(originalPrice !== undefined ? { originalPrice } : {}),
         ...(thumbnail ? { thumbnail } : {}),
+        ...(form.examTrack ? { examTrack: form.examTrack } : {}),
+        ...(form.classLevel ? { classLevel: form.classLevel } : {}),
+        ...(form.targetExamYear ? { targetExamYear: form.targetExamYear } : {}),
+        ...(form.medium ? { medium: form.medium } : {}),
       };
 
       if (editingCourseId) {
@@ -310,6 +324,47 @@ export default function TeacherDashboard() {
                   placeholder="e.g. 4999"
                 />
                 <small style={{ color: 'var(--text-muted)' }}>Shows as strikethrough discount</small>
+              </div>
+            </div>
+            <div className="form-group" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+              <div>
+                <label>Exam track</label>
+                <select
+                  className="form-control"
+                  value={form.examTrack}
+                  onChange={(e) => setForm({ ...form, examTrack: e.target.value })}
+                >
+                  {EXAM_TRACK_OPTIONS.map((t) => (
+                    <option key={t || 'none'} value={t}>{t || 'Not set'}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label>Class / level</label>
+                <input
+                  className="form-control"
+                  placeholder="e.g. Class 12, Dropper"
+                  value={form.classLevel}
+                  onChange={(e) => setForm({ ...form, classLevel: e.target.value })}
+                />
+              </div>
+              <div>
+                <label>Target exam year</label>
+                <input
+                  className="form-control"
+                  placeholder="e.g. 2027"
+                  value={form.targetExamYear}
+                  onChange={(e) => setForm({ ...form, targetExamYear: e.target.value })}
+                />
+              </div>
+              <div>
+                <label>Medium</label>
+                <input
+                  className="form-control"
+                  placeholder="English / Hindi / Hinglish"
+                  value={form.medium}
+                  onChange={(e) => setForm({ ...form, medium: e.target.value })}
+                />
               </div>
             </div>
             <div className="form-group">

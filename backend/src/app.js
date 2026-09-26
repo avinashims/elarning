@@ -20,6 +20,7 @@ const cartRoutes = require('./routes/cartRoutes');
 const wishlistRoutes = require('./routes/wishlistRoutes');
 const videoRoutes = require('./routes/videoRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+const platformRoutes = require('./routes/platformRoutes');
 
 const app = express();
 
@@ -63,6 +64,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/uploads', express.static(path.join(config.uploadsPath)));
 
+app.use('/api/platform', platformRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api', lessonRoutes);

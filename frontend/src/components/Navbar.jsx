@@ -11,7 +11,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [categories, setCategories] = useState([]);
-  const [showCategories, setShowCategories] = useState(false);
+  const [showStudy, setShowStudy] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export default function Navbar() {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    navigate(`/courses?q=${encodeURIComponent(search.trim())}`);
+    navigate(`/batches?q=${encodeURIComponent(search.trim())}`);
     setMobileOpen(false);
   };
 
@@ -45,40 +45,46 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="container navbar-inner">
-        <Link to="/" className="navbar-brand" onClick={closeMobile}>Udemy</Link>
+        <Link to="/" className="navbar-brand" onClick={closeMobile}>
+          Avi SkillStream
+        </Link>
 
         <div
           className="navbar-explore"
-          onMouseEnter={() => setShowCategories(true)}
-          onMouseLeave={() => setShowCategories(false)}
+          onMouseEnter={() => setShowStudy(true)}
+          onMouseLeave={() => setShowStudy(false)}
         >
-          <span>Categories</span>
-          {showCategories && (
+          <span>Study</span>
+          {showStudy && (
             <div className="categories-dropdown">
-              {categories.map((cat) => (
-                <Link key={cat.id} to={`/courses?category=${cat.slug}`} onClick={() => setShowCategories(false)}>
+              {categories.slice(0, 10).map((cat) => (
+                <Link key={cat.id} to={`/batches?category=${cat.slug}`} onClick={() => setShowStudy(false)}>
                   {cat.icon} {cat.name}
                 </Link>
               ))}
+              <Link to="/batches" onClick={() => setShowStudy(false)}>All batches</Link>
             </div>
           )}
         </div>
 
         <form className="navbar-search" onSubmit={handleSearch}>
           <button type="submit" className="search-icon" aria-label="Search">🔍</button>
-          <input type="text" placeholder="Search for anything" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <input type="text" placeholder="Search batches" value={search} onChange={(e) => setSearch(e.target.value)} />
         </form>
 
         <div className="navbar-links">
-          <Link to="/pricing">Plans & Pricing</Link>
-          {isTeacher && <Link to="/teacher">Instructor</Link>}
+          <Link to="/batches">Batches</Link>
+          <Link to="/live-classes">Live Classes</Link>
+          <Link to="/test-series">Test Series</Link>
+          <Link to="/pricing" className="hide-mobile">Plans</Link>
+          {isTeacher && <Link to="/teacher">Teach</Link>}
           {isAdmin && <Link to="/admin">Admin</Link>}
         </div>
 
         <div className="navbar-actions">
           {user ? (
             <>
-              <Link to="/my-courses" className="nav-link hide-mobile">My learning</Link>
+              <Link to="/my-courses" className="nav-link hide-mobile">My Learning</Link>
               <Link to="/wishlist" className="nav-icon" title="Wishlist">♡ {wishlistCount > 0 && <span className="badge-count">{wishlistCount}</span>}</Link>
               <Link to="/cart" className="nav-icon" title="Cart">🛒 {(cart?.count ?? 0) > 0 && <span className="badge-count">{cart.count}</span>}</Link>
               <span className="user-name">{user.name.split(' ')[0]}</span>
@@ -102,7 +108,7 @@ export default function Navbar() {
       </div>
 
       <form className="mobile-search-bar container" onSubmit={handleSearch}>
-        <input type="text" placeholder="Search for anything" value={search} onChange={(e) => setSearch(e.target.value)} />
+        <input type="text" placeholder="Search batches" value={search} onChange={(e) => setSearch(e.target.value)} />
         <button type="submit" className="btn btn-primary btn-sm">Search</button>
       </form>
 
@@ -114,19 +120,20 @@ export default function Navbar() {
               <button type="button" onClick={closeMobile} aria-label="Close menu">✕</button>
             </div>
 
-            <Link to="/courses" onClick={closeMobile}>Browse courses</Link>
-            <Link to="/pricing" onClick={closeMobile}>Plans & Pricing</Link>
-            <Link to="/live-classes" onClick={closeMobile}>Live classes</Link>
-            {user && <Link to="/my-courses" onClick={closeMobile}>My learning</Link>}
+            <Link to="/batches" onClick={closeMobile}>Batches</Link>
+            <Link to="/live-classes" onClick={closeMobile}>Live Classes</Link>
+            <Link to="/test-series" onClick={closeMobile}>Test Series</Link>
+            <Link to="/pricing" onClick={closeMobile}>Plans</Link>
+            {user && <Link to="/my-courses" onClick={closeMobile}>My Learning</Link>}
             {user && <Link to="/wishlist" onClick={closeMobile}>Wishlist</Link>}
             {user && <Link to="/cart" onClick={closeMobile}>Cart ({cart?.count ?? 0})</Link>}
-            {isTeacher && <Link to="/teacher" onClick={closeMobile}>Instructor</Link>}
+            {isTeacher && <Link to="/teacher" onClick={closeMobile}>Teach</Link>}
             {isAdmin && <Link to="/admin" onClick={closeMobile}>Admin</Link>}
 
             <div className="mobile-nav-categories">
-              <span>Categories</span>
+              <span>Study</span>
               {categories.map((cat) => (
-                <Link key={cat.id} to={`/courses?category=${cat.slug}`} onClick={closeMobile}>
+                <Link key={cat.id} to={`/batches?category=${cat.slug}`} onClick={closeMobile}>
                   {cat.icon} {cat.name}
                 </Link>
               ))}

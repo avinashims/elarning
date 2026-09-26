@@ -15,6 +15,7 @@ import Wishlist from './pages/Wishlist';
 import Instructor from './pages/Instructor';
 import Pricing from './pages/Pricing';
 import LiveClasses from './pages/LiveClasses';
+import TestSeries from './pages/TestSeries';
 import Recordings from './pages/Recordings';
 import AdminDashboard from './pages/AdminDashboard';
 import TeacherDashboard from './pages/TeacherDashboard';
@@ -31,6 +32,8 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/courses" element={<Courses />} />
+          <Route path="/batches" element={<Courses batchesMode />} />
+          <Route path="/test-series" element={<TestSeries />} />
           <Route path="/courses/:id" element={<CourseDetail />} />
           <Route path="/instructor/:id" element={<Instructor />} />
           <Route path="/lessons/:id" element={

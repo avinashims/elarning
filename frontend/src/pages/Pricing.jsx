@@ -50,7 +50,7 @@ export default function Pricing() {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount,
         currency: 'INR',
-        name: 'Udemy',
+        name: 'Avi SkillStream',
         description: plan.name,
         order_id: orderId,
         handler: async (response) => {

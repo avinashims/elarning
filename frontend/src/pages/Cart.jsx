@@ -46,7 +46,7 @@ export default function Cart() {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount,
         currency: 'INR',
-        name: 'Udemy',
+        name: 'Avi SkillStream',
         description: `${cart.count} course(s)`,
         order_id: orderId,
         handler: async (response) => {

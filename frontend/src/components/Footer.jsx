@@ -7,8 +7,8 @@ export default function Footer() {
       <div className="footer-cta">
         <div className="container footer-cta-inner">
           <div>
-            <h3>Teach the world online</h3>
-            <p>Turn your expertise into a course on Udemy.</p>
+            <h3>Teach on Avi SkillStream</h3>
+            <p>Launch live batches and test series for your students.</p>
           </div>
           <Link to="/register" className="btn btn-dark">Get started</Link>
         </div>
@@ -16,31 +16,32 @@ export default function Footer() {
 
       <div className="footer-links container">
         <div className="footer-col">
-          <h4>Udemy Business</h4>
-          <a href="#">Get the app</a>
-          <a href="#">Teach on Udemy</a>
+          <h4>Study</h4>
+          <Link to="/batches">Batches</Link>
+          <Link to="/test-series">Test series</Link>
+          <Link to="/live-classes">Live classes</Link>
         </div>
         <div className="footer-col">
-          <h4>About us</h4>
-          <Link to="/courses">Browse courses</Link>
-          <Link to="/pricing">Plans & Pricing</Link>
+          <h4>Exams</h4>
+          <Link to="/batches?examTrack=IIT-JEE">IIT JEE</Link>
+          <Link to="/batches?examTrack=NEET">NEET</Link>
+          <Link to="/batches?examTrack=SSC">SSC</Link>
         </div>
         <div className="footer-col">
-          <h4>Discover</h4>
-          <Link to="/courses?category=development">Development</Link>
-          <Link to="/courses?category=business">Business</Link>
-          <Link to="/courses?category=design">Design</Link>
+          <h4>Account</h4>
+          <Link to="/pricing">Plans</Link>
+          <Link to="/my-courses">My learning</Link>
         </div>
         <div className="footer-col">
           <h4>Support</h4>
-          <Link to="/live-classes">Live classes</Link>
-          <Link to="/my-courses">My learning</Link>
+          <Link to="/login">Log in</Link>
+          <Link to="/register">Sign up</Link>
         </div>
       </div>
 
       <div className="footer-bottom container">
-        <span className="footer-logo">Udemy</span>
-        <span>© {new Date().getFullYear()} Udemy, Inc.</span>
+        <span className="footer-logo">Avi SkillStream</span>
+        <span>© {new Date().getFullYear()} Avi SkillStream</span>
       </div>
     </footer>
   );
