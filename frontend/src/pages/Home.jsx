@@ -11,6 +11,8 @@ const TRACK_TO_FILTER = {
   neet: 'NEET',
   ssc: 'SSC',
   cbse: 'CBSE',
+  icse: 'ICSE',
+  'up-board': 'UP Board',
   upsc: 'UPSC',
   gate: 'GATE',
 };
@@ -36,6 +38,7 @@ export default function Home() {
   };
 
   const examTracks = platform?.examTracks || [];
+  const exploreCategories = platform?.exploreCategories || [];
   const featuredBatches = platform?.featuredBatches || [];
   const upcomingLive = platform?.upcomingLive || [];
   const stats = platform?.stats || {};
@@ -93,6 +96,40 @@ export default function Home() {
             <span>Live today</span>
           </div>
           <Link to="/live-classes" className="btn btn-primary btn-sm">View schedule</Link>
+        </div>
+      </section>
+
+      <section className="explore-categories container">
+        <div className="section-header">
+          <h2>Browse categories</h2>
+        </div>
+        <div className="explore-category-grid">
+          {exploreCategories.map((cat) => (
+            <article key={cat.slug} className="explore-category-card">
+              <div className="explore-category-body">
+                <h3>{cat.title}</h3>
+                {cat.pills?.length > 0 ? (
+                  <div className="explore-pills">
+                    {cat.pills.map((pill) => (
+                      <Link key={pill.path} to={pill.path} className="board-chip">
+                        {pill.label}
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <Link to={cat.explorePath} className="explore-link">
+                    Explore Category <span aria-hidden>→</span>
+                  </Link>
+                )}
+                {cat.pills?.length > 0 && (
+                  <Link to={cat.explorePath} className="explore-link explore-link-bottom">
+                    Explore Category <span aria-hidden>→</span>
+                  </Link>
+                )}
+              </div>
+              <span className="explore-category-art" aria-hidden>{cat.icon}</span>
+            </article>
+          ))}
         </div>
       </section>
 

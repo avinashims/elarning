@@ -16,6 +16,7 @@ import Instructor from './pages/Instructor';
 import Pricing from './pages/Pricing';
 import LiveClasses from './pages/LiveClasses';
 import TestSeries from './pages/TestSeries';
+import ExamLanding from './pages/ExamLanding';
 import Recordings from './pages/Recordings';
 import AdminDashboard from './pages/AdminDashboard';
 import TeacherDashboard from './pages/TeacherDashboard';
@@ -29,6 +30,11 @@ export default function App() {
       <main className="main-content">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/school-boards" element={<ExamLanding pageSlug="school-boards" />} />
+          <Route path="/cbse-science" element={<ExamLanding pageSlug="cbse-science" />} />
+          <Route path="/cbse" element={<ExamLanding pageSlug="cbse" />} />
+          <Route path="/icse" element={<ExamLanding pageSlug="icse" />} />
+          <Route path="/up-board" element={<ExamLanding pageSlug="up-board" />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/courses" element={<Courses />} />

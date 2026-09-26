@@ -1,5 +1,5 @@
 const prisma = require('../config/database');
-const { EXAM_TRACKS } = require('../constants/examTracks');
+const { EXAM_TRACKS, EXPLORE_CATEGORIES } = require('../constants/examTracks');
 const { getUpcomingLiveClasses } = require('./liveClassService');
 const { attachRatingStats } = require('./courseService');
 
@@ -24,6 +24,7 @@ async function getHomePlatformData() {
 
   return {
     examTracks: EXAM_TRACKS,
+    exploreCategories: EXPLORE_CATEGORIES,
     stats: {
       batches: batchCount,
       testSeries: testSeriesCount,

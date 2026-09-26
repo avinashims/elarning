@@ -56,17 +56,19 @@ async function attachRatingStats(courses) {
 }
 
 async function getPublishedCourses(filters = {}) {
-  const { category, level, q, sort, minPrice, maxPrice, examTrack } = filters;
+  const { category, level, q, sort, minPrice, maxPrice, examTrack, classLevel, stream } = filters;
 
   const where = { isPublished: true };
   if (category) where.category = { slug: category };
   if (examTrack) where.examTrack = { equals: examTrack, mode: 'insensitive' };
+  if (classLevel) where.classLevel = { equals: classLevel, mode: 'insensitive' };
   if (level) where.level = level;
-  if (q) {
+  const searchTerm = stream || q;
+  if (searchTerm) {
     where.OR = [
-      { title: { contains: q, mode: 'insensitive' } },
-      { description: { contains: q, mode: 'insensitive' } },
-      { subtitle: { contains: q, mode: 'insensitive' } },
+      { title: { contains: searchTerm, mode: 'insensitive' } },
+      { description: { contains: searchTerm, mode: 'insensitive' } },
+      { subtitle: { contains: searchTerm, mode: 'insensitive' } },
     ];
   }
   if (minPrice !== undefined || maxPrice !== undefined) {

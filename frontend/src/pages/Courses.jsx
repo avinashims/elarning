@@ -25,6 +25,8 @@ const EXAM_TRACKS = [
   { value: 'NEET', label: 'NEET' },
   { value: 'SSC', label: 'SSC / Govt' },
   { value: 'CBSE', label: 'CBSE' },
+  { value: 'ICSE', label: 'ICSE' },
+  { value: 'UP Board', label: 'UP Board' },
   { value: 'UPSC', label: 'UPSC' },
   { value: 'GATE', label: 'GATE' },
 ];
@@ -37,6 +39,7 @@ export default function Courses({ batchesMode = false }) {
   const sort = searchParams.get('sort') || '';
   const priceFilter = searchParams.get('price') || '';
   const examTrack = searchParams.get('examTrack') || '';
+  const classLevel = searchParams.get('classLevel') || '';
 
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -56,12 +59,13 @@ export default function Courses({ batchesMode = false }) {
     if (priceFilter === 'free') params.set('maxPrice', '0');
     if (priceFilter === 'paid') params.set('minPrice', '1');
     if (examTrack) params.set('examTrack', examTrack);
+    if (classLevel) params.set('classLevel', classLevel);
 
     api.get(`/courses?${params.toString()}`)
       .then((res) => setCourses(res.data.data))
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [query, category, level, sort, priceFilter, examTrack]);
+  }, [query, category, level, sort, priceFilter, examTrack, classLevel]);
 
   const updateFilter = (key, value) => {
     const next = new URLSearchParams(searchParams);

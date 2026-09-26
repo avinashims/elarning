@@ -1,0 +1,82 @@
+.exam-landing-hero {
+  background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 2rem 0 2.5rem;
+}
+
+.exam-landing-breadcrumb {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.exam-landing-breadcrumb a {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.exam-landing-breadcrumb span {
+  margin: 0 0.35rem;
+}
+
+.exam-landing-hero h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.exam-landing-sub {
+  color: var(--text-muted);
+  max-width: 640px;
+  line-height: 1.5;
+  margin-bottom: 1.25rem;
+}
+
+.exam-landing-boards,
+.exam-landing-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.board-chip-lg {
+  padding: 0.65rem 1.25rem;
+  font-size: 0.9375rem;
+}
+
+.filter-chip {
+  border: 1px solid var(--border);
+  background: #fff;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 999px;
+}
+
+.filter-chip.active,
+.filter-chip:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.exam-landing-results {
+  padding: 2.5rem 0 3rem;
+}
+
+.exam-landing-results .result-count {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.exam-landing-more {
+  margin-top: 2rem;
+}
+
+.exam-landing-more a {
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.exam-landing-hub {
+  padding: 2rem 0 3rem;
+}
