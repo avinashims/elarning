@@ -16,7 +16,7 @@ export default function ExamLanding({ pageSlug }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!config || pageSlug === 'school-boards') {
+    if (!config || pageSlug === 'school-boards' || pageSlug === 'coding-programs') {
       setLoading(false);
       setCourses([]);
       return;
@@ -52,7 +52,7 @@ export default function ExamLanding({ pageSlug }) {
     );
   }
 
-  const isHub = pageSlug === 'school-boards';
+  const isHub = pageSlug === 'school-boards' || pageSlug === 'coding-programs';
 
   return (
     <div className="exam-landing">

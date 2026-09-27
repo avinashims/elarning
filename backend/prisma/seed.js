@@ -85,6 +85,9 @@ async function main() {
     { id: 'cat-upsc', name: 'UPSC', slug: 'upsc', icon: '🏛️' },
     { id: 'cat-gate', name: 'GATE', slug: 'gate', icon: '⚙️' },
     { id: 'cat-dev', name: 'Development', slug: 'development', icon: '💻' },
+    { id: 'cat-mern', name: 'MERN Stack', slug: 'mern-stack', icon: '⚡' },
+    { id: 'cat-php', name: 'PHP', slug: 'php', icon: '🐘' },
+    { id: 'cat-wordpress', name: 'WordPress', slug: 'wordpress', icon: '📝' },
     { id: 'cat-business', name: 'Business', slug: 'business', icon: '📊' },
   ];
 
@@ -93,6 +96,13 @@ async function main() {
     'Recorded lectures',
     'DPP & practice sheets',
     'Mock tests & analytics',
+  ];
+
+  const batchFeaturesCoding = [
+    'Live coding sessions',
+    'Real-world projects',
+    'Code review & doubt support',
+    'Certificate on completion',
   ];
 
   for (const cat of categories) {
@@ -106,16 +116,17 @@ async function main() {
   const course = await prisma.course.upsert({
     where: { id: 'course-web-dev' },
     update: {
-      examTrack: 'IIT-JEE',
-      classLevel: 'Dropper',
-      targetExamYear: '2027',
+      examTrack: 'MERN',
+      classLevel: 'All levels',
+      targetExamYear: '2026',
       medium: 'English',
-      batchFeatures: batchFeaturesDefault,
+      categoryId: 'cat-mern',
+      batchFeatures: batchFeaturesCoding,
     },
     create: {
       id: 'course-web-dev',
-      title: 'Complete Web Development Bootcamp',
-      subtitle: 'Become a Full-Stack Web Developer with HTML, CSS, Javascript, Node, React, PostgreSQL, and more!',
+      title: 'MERN Full Stack Program',
+      subtitle: 'MongoDB, Express, React & Node — live projects from zero to job-ready',
       description: 'Learn HTML, CSS, JavaScript, React, Node.js and build real-world projects from scratch. This comprehensive course takes you from zero to job-ready developer.',
       thumbnail: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800',
       price: 3199,
@@ -132,12 +143,76 @@ async function main() {
       targetAudience: ['Anyone who wants to learn web development', 'Career changers entering tech'],
       isPublished: true,
       teacherId: teacher.id,
-      categoryId: 'cat-dev',
-      examTrack: 'IIT-JEE',
-      classLevel: 'Dropper',
-      targetExamYear: '2027',
+      categoryId: 'cat-mern',
+      examTrack: 'MERN',
+      classLevel: 'All levels',
+      targetExamYear: '2026',
       medium: 'English',
-      batchFeatures: batchFeaturesDefault,
+      batchFeatures: batchFeaturesCoding,
+    },
+  });
+
+  await prisma.course.upsert({
+    where: { id: 'course-php-program' },
+    update: {
+      examTrack: 'PHP',
+      classLevel: 'Beginner to Advanced',
+      medium: 'English',
+      batchFeatures: batchFeaturesCoding,
+    },
+    create: {
+      id: 'course-php-program',
+      title: 'PHP Program',
+      subtitle: 'Core PHP, OOP, MySQL, Laravel basics & REST APIs',
+      description: 'Structured PHP program with live classes, assignments, and portfolio projects for backend and CMS roles.',
+      thumbnail: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800',
+      price: 2499,
+      originalPrice: 6999,
+      level: 'ALL_LEVELS',
+      language: 'English',
+      learningObjectives: ['PHP fundamentals & OOP', 'MySQL & CRUD apps', 'API development basics', 'Deploy PHP apps'],
+      requirements: ['Basic computer skills'],
+      targetAudience: ['Aspiring backend developers', 'Career switchers'],
+      isPublished: true,
+      teacherId: teacher.id,
+      categoryId: 'cat-php',
+      examTrack: 'PHP',
+      classLevel: 'Beginner to Advanced',
+      targetExamYear: '2026',
+      medium: 'English',
+      batchFeatures: batchFeaturesCoding,
+    },
+  });
+
+  await prisma.course.upsert({
+    where: { id: 'course-wordpress-program' },
+    update: {
+      examTrack: 'WordPress',
+      classLevel: 'All levels',
+      medium: 'English',
+      batchFeatures: batchFeaturesCoding,
+    },
+    create: {
+      id: 'course-wordpress-program',
+      title: 'WordPress Program',
+      subtitle: 'Themes, plugins, Elementor, WooCommerce & client sites',
+      description: 'Learn WordPress development and freelancing skills with live builds, security best practices, and hosting.',
+      thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800',
+      price: 1999,
+      originalPrice: 5499,
+      level: 'BEGINNER',
+      language: 'English',
+      learningObjectives: ['Custom themes & child themes', 'Plugin development intro', 'WooCommerce stores', 'Site speed & SEO basics'],
+      requirements: ['No coding required to start'],
+      targetAudience: ['Freelancers', 'Agency beginners', 'Small business owners'],
+      isPublished: true,
+      teacherId: teacher.id,
+      categoryId: 'cat-wordpress',
+      examTrack: 'WordPress',
+      classLevel: 'All levels',
+      targetExamYear: '2026',
+      medium: 'English',
+      batchFeatures: batchFeaturesCoding,
     },
   });
 

@@ -16,7 +16,10 @@ const emptyCourseForm = {
   medium: '',
 };
 
-const EXAM_TRACK_OPTIONS = ['', 'IIT-JEE', 'NEET', 'SSC', 'CBSE', 'ICSE', 'UP Board', 'UPSC', 'GATE'];
+const EXAM_TRACK_OPTIONS = [
+  '', 'IIT-JEE', 'NEET', 'SSC', 'CBSE', 'ICSE', 'UP Board', 'UPSC', 'GATE',
+  'MERN', 'PHP', 'WordPress',
+];
 
 function formatPrice(price) {
   if (!price || price === 0) return 'Free';

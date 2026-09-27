@@ -29,6 +29,9 @@ const EXAM_TRACKS = [
   { value: 'UP Board', label: 'UP Board' },
   { value: 'UPSC', label: 'UPSC' },
   { value: 'GATE', label: 'GATE' },
+  { value: 'MERN', label: 'MERN Full Stack' },
+  { value: 'PHP', label: 'PHP Program' },
+  { value: 'WordPress', label: 'WordPress Program' },
 ];
 
 export default function Courses({ batchesMode = false }) {

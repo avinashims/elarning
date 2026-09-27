@@ -1,5 +1,45 @@
 /** PW-style landing pages: /cbse-science, /icse, /up-board, /school-boards */
 export const EXAM_LANDING_PAGES = {
+  'coding-programs': {
+    title: 'Top Programming',
+    subtitle: 'Job-oriented live programs — MERN, PHP & WordPress',
+    category: '',
+    examTrack: '',
+    defaultStream: '',
+    classLevels: [],
+    boardLinks: [
+      { label: 'MERN Full Stack', path: '/mern-full-stack?came_from=exam_cards' },
+      { label: 'PHP Program', path: '/php-program?came_from=exam_cards' },
+      { label: 'WordPress Program', path: '/wordpress-program?came_from=exam_cards' },
+    ],
+  },
+  'mern-full-stack': {
+    title: 'MERN Full Stack Program',
+    subtitle: 'MongoDB, Express, React & Node — build full-stack apps with live mentorship',
+    category: 'mern-stack',
+    examTrack: 'MERN',
+    defaultStream: '',
+    classLevels: [],
+    boardLinks: [],
+  },
+  'php-program': {
+    title: 'PHP Program',
+    subtitle: 'Backend PHP, MySQL, and modern workflow for web developers',
+    category: 'php',
+    examTrack: 'PHP',
+    defaultStream: '',
+    classLevels: [],
+    boardLinks: [],
+  },
+  'wordpress-program': {
+    title: 'WordPress Program',
+    subtitle: 'Sites, themes, plugins & WooCommerce for freelancers and agencies',
+    category: 'wordpress',
+    examTrack: 'WordPress',
+    defaultStream: '',
+    classLevels: [],
+    boardLinks: [],
+  },
   'school-boards': {
     title: 'School Boards',
     subtitle: 'CBSE, ICSE & UP Board batches for Class 9–12',

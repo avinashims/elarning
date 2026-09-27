@@ -12,6 +12,17 @@ const EXAM_TRACKS = [
 /** PW-style browse cards on home (School Boards, UPSC, Govt, etc.) */
 const EXPLORE_CATEGORIES = [
   {
+    slug: 'top-programming',
+    title: 'Top Programming',
+    icon: '💻',
+    explorePath: '/coding-programs?came_from=exam_cards',
+    pills: [
+      { label: 'MERN Full Stack', path: '/mern-full-stack?came_from=exam_cards' },
+      { label: 'PHP Program', path: '/php-program?came_from=exam_cards' },
+      { label: 'WordPress Program', path: '/wordpress-program?came_from=exam_cards' },
+    ],
+  },
+  {
     slug: 'school-boards',
     title: 'School Boards',
     icon: '🎒',

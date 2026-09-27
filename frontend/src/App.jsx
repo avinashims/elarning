@@ -30,6 +30,10 @@ export default function App() {
       <main className="main-content">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/coding-programs" element={<ExamLanding pageSlug="coding-programs" />} />
+          <Route path="/mern-full-stack" element={<ExamLanding pageSlug="mern-full-stack" />} />
+          <Route path="/php-program" element={<ExamLanding pageSlug="php-program" />} />
+          <Route path="/wordpress-program" element={<ExamLanding pageSlug="wordpress-program" />} />
           <Route path="/school-boards" element={<ExamLanding pageSlug="school-boards" />} />
           <Route path="/cbse-science" element={<ExamLanding pageSlug="cbse-science" />} />
           <Route path="/cbse" element={<ExamLanding pageSlug="cbse" />} />

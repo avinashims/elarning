@@ -51,7 +51,7 @@ export default function Home() {
             <p className="hero-kicker">Live-first exam prep</p>
             <h1>Crack your exam with Avi SkillStream</h1>
             <p>
-              Join live batches, test series, and recorded revision — JEE, NEET, SSC, and more.
+              Join live batches, test series, and coding programs — JEE, NEET, MERN, PHP, WordPress, and more.
             </p>
             <form className="hero-search" onSubmit={handleSearch}>
               <input
