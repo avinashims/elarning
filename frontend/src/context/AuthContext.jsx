@@ -88,6 +88,8 @@ export function AuthProvider({ children }) {
     isAuthenticated: !!user,
     isAdmin: user?.role === 'ADMIN',
     isTeacher: user?.role === 'TEACHER' || user?.role === 'ADMIN',
+    isApprovedTeacher:
+      user?.role === 'ADMIN' || (user?.role === 'TEACHER' && user?.teacherApproved !== false),
     isStudent: user?.role === 'STUDENT',
   };
 

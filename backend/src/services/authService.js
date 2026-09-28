@@ -11,6 +11,7 @@ const USER_SELECT = {
   name: true,
   role: true,
   avatar: true,
+  teacherApproved: true,
   createdAt: true,
 };
 
@@ -71,6 +72,10 @@ async function loginUser({ email, password }) {
   }
 
   const { password: _, ...userWithoutPassword } = user;
+  if (user.role === 'TEACHER' && user.teacherApproved === false) {
+    throw new AppError('Your teacher account has been disapproved. Contact admin.', 403);
+  }
+
   const tokens = await issueTokenPair(userWithoutPassword);
   return { user: userWithoutPassword, ...tokens };
 }
@@ -120,6 +125,10 @@ async function loginWithGoogle({ idToken, role }) {
       },
       select: USER_SELECT,
     });
+  }
+
+  if (user.role === 'TEACHER' && user.teacherApproved === false) {
+    throw new AppError('Your teacher account has been disapproved. Contact admin.', 403);
   }
 
   const tokens = await issueTokenPair(user);

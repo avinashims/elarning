@@ -51,6 +51,7 @@ model User {
   headline  String?
   bio       String?
   website   String?
+  teacherApproved Boolean @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

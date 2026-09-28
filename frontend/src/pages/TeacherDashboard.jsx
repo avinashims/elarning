@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { datetimeLocalToIso, formatAppDateTime, defaultDatetimeLocalValue } from '../utils/dateTime';
 
@@ -27,7 +28,9 @@ function formatPrice(price) {
 }
 
 export default function TeacherDashboard() {
+  const { isApprovedTeacher } = useAuth();
   const [data, setData] = useState(null);
+  const [teacherApproved, setTeacherApproved] = useState(true);
   const [liveClasses, setLiveClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(null);
@@ -47,6 +50,17 @@ export default function TeacherDashboard() {
   });
   const [endForm, setEndForm] = useState({ id: null, recordingUrl: '' });
   const [loadError, setLoadError] = useState('');
+  const [curriculumCourseId, setCurriculumCourseId] = useState('');
+  const [curriculum, setCurriculum] = useState(null);
+  const [chapterTitle, setChapterTitle] = useState('');
+  const [lessonForm, setLessonForm] = useState({
+    chapterId: '',
+    title: '',
+    description: '',
+    isPremium: false,
+  });
+  const [lessonVideoFile, setLessonVideoFile] = useState(null);
+  const [curriculumSaving, setCurriculumSaving] = useState(false);
 
   const fetchData = () => {
     setLoadError('');
@@ -61,6 +75,7 @@ export default function TeacherDashboard() {
           throw new Error('Invalid dashboard response');
         }
         setData(payload);
+        setTeacherApproved(payload.teacherApproved !== false);
         setLiveClasses(liveRes.data?.data || []);
       })
       .catch((err) => {
@@ -252,6 +267,95 @@ export default function TeacherDashboard() {
     }
   };
 
+  const loadCurriculum = async (courseId) => {
+    if (!courseId) {
+      setCurriculum(null);
+      return;
+    }
+    try {
+      const res = await api.get(`/courses/${courseId}`);
+      setCurriculum(res.data.data);
+      const firstChapter = res.data.data?.chapters?.[0];
+      setLessonForm((prev) => ({
+        ...prev,
+        chapterId: firstChapter?.id || '',
+      }));
+    } catch (err) {
+      alert(err.response?.data?.message || 'Could not load course curriculum');
+      setCurriculum(null);
+    }
+  };
+
+  const handleCurriculumCourseChange = (courseId) => {
+    setCurriculumCourseId(courseId);
+    loadCurriculum(courseId);
+  };
+
+  const handleAddChapter = async (e) => {
+    e.preventDefault();
+    if (!curriculumCourseId || !chapterTitle.trim()) return;
+    setCurriculumSaving(true);
+    try {
+      await api.post(`/courses/${curriculumCourseId}/chapters`, {
+        title: chapterTitle.trim(),
+      });
+      setChapterTitle('');
+      await loadCurriculum(curriculumCourseId);
+      fetchData();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to add chapter');
+    } finally {
+      setCurriculumSaving(false);
+    }
+  };
+
+  const uploadLessonVideo = async () => {
+    if (!lessonVideoFile) return undefined;
+    const payload = new FormData();
+    payload.append('video', lessonVideoFile);
+    const res = await api.post('/uploads/lesson-video', payload, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data.data.videoKey;
+  };
+
+  const handleAddRecordedLesson = async (e) => {
+    e.preventDefault();
+    if (!lessonForm.chapterId || !lessonForm.title.trim()) {
+      alert('Select a chapter and enter a lesson title');
+      return;
+    }
+    if (!lessonVideoFile) {
+      alert('Choose a recorded video file (MP4, WEBM, MOV, or M4V)');
+      return;
+    }
+    setCurriculumSaving(true);
+    try {
+      const videoKey = await uploadLessonVideo();
+      await api.post(`/chapters/${lessonForm.chapterId}/lessons`, {
+        title: lessonForm.title.trim(),
+        description: lessonForm.description.trim() || undefined,
+        videoKey,
+        isPremium: lessonForm.isPremium,
+      });
+      setLessonForm({
+        chapterId: lessonForm.chapterId,
+        title: '',
+        description: '',
+        isPremium: false,
+      });
+      setLessonVideoFile(null);
+      await loadCurriculum(curriculumCourseId);
+      alert('Recorded lesson added!');
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to add lesson');
+    } finally {
+      setCurriculumSaving(false);
+    }
+  };
+
+  const canTeach = isApprovedTeacher && teacherApproved;
+
   if (loading) return <div className="loading container">Loading...</div>;
 
   if (!data) {
@@ -273,7 +377,7 @@ export default function TeacherDashboard() {
           <p>Manage your courses and live classes</p>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button onClick={openCreateCourse} className="btn btn-primary btn-sm">
+          <button onClick={openCreateCourse} className="btn btn-primary btn-sm" disabled={!canTeach}>
             + New Course
           </button>
           <button
@@ -283,11 +387,18 @@ export default function TeacherDashboard() {
               else openScheduleLive();
             }}
             className="btn btn-secondary btn-sm"
+            disabled={!canTeach}
           >
             + Schedule Live Class
           </button>
         </div>
       </div>
+
+      {!canTeach && (
+        <div className="alert alert-error" style={{ marginBottom: '1.5rem' }}>
+          Your teacher account is disapproved. You can view this page but cannot create courses, upload videos, or schedule live classes until an admin approves you.
+        </div>
+      )}
 
       {showForm === 'course' && (
         <div className="card" style={{ marginBottom: '2rem' }}>
@@ -543,13 +654,135 @@ export default function TeacherDashboard() {
                   <td>{c.isPublished ? <span className="badge badge-success">Yes</span> : <span className="badge badge-warning">Draft</span>}</td>
                   <td style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                     <Link to={`/courses/${c.id}`} className="btn btn-sm btn-secondary">View</Link>
-                    <button type="button" onClick={() => openEditCourse(c)} className="btn btn-sm btn-primary">Edit</button>
-                    <button type="button" onClick={() => handleDeleteCourse(c)} className="btn btn-sm btn-danger">Delete</button>
+                    <button type="button" onClick={() => openEditCourse(c)} className="btn btn-sm btn-primary" disabled={!canTeach}>Edit</button>
+                    <button type="button" onClick={() => handleDeleteCourse(c)} className="btn btn-sm btn-danger" disabled={!canTeach}>Delete</button>
+                    <button type="button" onClick={() => handleCurriculumCourseChange(c.id)} className="btn btn-sm btn-secondary">Videos</button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        )}
+      </div>
+
+      <div className="card" style={{ marginTop: '2rem' }}>
+        <h2 style={{ marginBottom: '0.5rem' }}>Recorded video lessons</h2>
+        <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>
+          Add chapters and upload MP4/WEBM recordings for students to watch in the course player.
+        </p>
+        <div className="form-group">
+          <label>Course</label>
+          <select
+            className="form-control"
+            value={curriculumCourseId}
+            onChange={(e) => handleCurriculumCourseChange(e.target.value)}
+          >
+            <option value="">Select a course</option>
+            {courses.map((c) => (
+              <option key={c.id} value={c.id}>{c.title}</option>
+            ))}
+          </select>
+        </div>
+
+        {curriculum && (
+          <>
+            <form onSubmit={handleAddChapter} style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+              <input
+                className="form-control"
+                placeholder="New chapter title"
+                value={chapterTitle}
+                onChange={(e) => setChapterTitle(e.target.value)}
+                style={{ flex: '1 1 200px' }}
+                disabled={!canTeach}
+              />
+              <button type="submit" className="btn btn-secondary btn-sm" disabled={!canTeach || curriculumSaving}>
+                Add chapter
+              </button>
+            </form>
+
+            {curriculum.chapters?.length > 0 ? (
+              <ul style={{ listStyle: 'none', padding: 0, marginBottom: '1.25rem' }}>
+                {curriculum.chapters.map((ch) => (
+                  <li key={ch.id} style={{ marginBottom: '0.75rem', padding: '0.75rem', border: '1px solid var(--border)' }}>
+                    <strong>{ch.title}</strong>
+                    <ul style={{ marginTop: '0.5rem', paddingLeft: '1.25rem' }}>
+                      {(ch.lessons || []).map((lesson) => (
+                        <li key={lesson.id}>
+                          {lesson.title}
+                          {lesson.hasVideo && <span className="badge badge-success" style={{ marginLeft: '0.5rem' }}>Video</span>}
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p style={{ color: 'var(--text-muted)' }}>No chapters yet. Add a chapter first.</p>
+            )}
+
+            <form onSubmit={handleAddRecordedLesson}>
+              <div className="form-group">
+                <label>Chapter</label>
+                <select
+                  className="form-control"
+                  value={lessonForm.chapterId}
+                  onChange={(e) => setLessonForm({ ...lessonForm, chapterId: e.target.value })}
+                  required
+                  disabled={!canTeach}
+                >
+                  <option value="">Select chapter</option>
+                  {(curriculum.chapters || []).map((ch) => (
+                    <option key={ch.id} value={ch.id}>{ch.title}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Lesson title</label>
+                <input
+                  className="form-control"
+                  value={lessonForm.title}
+                  onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })}
+                  required
+                  disabled={!canTeach}
+                />
+              </div>
+              <div className="form-group">
+                <label>Description (optional)</label>
+                <textarea
+                  className="form-control"
+                  rows={2}
+                  value={lessonForm.description}
+                  onChange={(e) => setLessonForm({ ...lessonForm, description: e.target.value })}
+                  disabled={!canTeach}
+                />
+              </div>
+              <div className="form-group">
+                <label>Recorded video file</label>
+                <input
+                  type="file"
+                  className="form-control"
+                  accept="video/mp4,video/webm,video/quicktime,video/x-m4v,.mp4,.webm,.mov,.m4v"
+                  onChange={(e) => setLessonVideoFile(e.target.files?.[0] || null)}
+                  disabled={!canTeach}
+                />
+                <small style={{ color: 'var(--text-muted)' }}>Max 500MB — MP4 recommended</small>
+              </div>
+              <div className="form-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={lessonForm.isPremium}
+                    onChange={(e) => setLessonForm({ ...lessonForm, isPremium: e.target.checked })}
+                    disabled={!canTeach}
+                  />
+                  {' '}Premium lesson (subscription required)
+                </label>
+              </div>
+              <button type="submit" className="btn btn-primary" disabled={!canTeach || curriculumSaving}>
+                {curriculumSaving ? 'Uploading…' : 'Upload & add lesson'}
+              </button>
+            </form>
+          </>
         )}
       </div>
     </div>

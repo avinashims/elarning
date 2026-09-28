@@ -39,7 +39,9 @@ const getDashboardStats = asyncHandler(async (req, res) => {
 
 const getUsers = asyncHandler(async (req, res) => {
   const users = await prisma.user.findMany({
-    select: { id: true, name: true, email: true, role: true, createdAt: true },
+    select: {
+      id: true, name: true, email: true, role: true, teacherApproved: true, createdAt: true,
+    },
     orderBy: { createdAt: 'desc' },
   });
   sendSuccess(res, users);
@@ -48,12 +50,39 @@ const getUsers = asyncHandler(async (req, res) => {
 const updateUserRole = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { role } = req.body;
+  const data = { role };
+  if (role === 'TEACHER') {
+    data.teacherApproved = true;
+  }
   const user = await prisma.user.update({
     where: { id },
-    data: { role },
-    select: { id: true, name: true, email: true, role: true },
+    data,
+    select: { id: true, name: true, email: true, role: true, teacherApproved: true },
   });
   sendSuccess(res, user, 200, 'User role updated');
+});
+
+const updateTeacherApproval = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { approved } = req.body;
+  if (typeof approved !== 'boolean') {
+    return res.status(400).json({ success: false, message: 'approved must be true or false' });
+  }
+
+  const existing = await prisma.user.findUnique({ where: { id } });
+  if (!existing) {
+    return res.status(404).json({ success: false, message: 'User not found' });
+  }
+  if (existing.role !== 'TEACHER') {
+    return res.status(400).json({ success: false, message: 'Only teacher accounts can be approved or disapproved' });
+  }
+
+  const user = await prisma.user.update({
+    where: { id },
+    data: { teacherApproved: approved },
+    select: { id: true, name: true, email: true, role: true, teacherApproved: true },
+  });
+  sendSuccess(res, user, 200, approved ? 'Teacher approved' : 'Teacher disapproved');
 });
 
 const getTeacherStats = asyncHandler(async (req, res) => {
@@ -83,6 +112,7 @@ const getTeacherStats = asyncHandler(async (req, res) => {
       totalRecordings: recordings,
     },
     courses,
+    teacherApproved: req.user.role === 'ADMIN' ? true : req.user.teacherApproved !== false,
   });
 });
 
@@ -97,4 +127,11 @@ const getAdminCourses = asyncHandler(async (req, res) => {
   sendSuccess(res, courses);
 });
 
-module.exports = { getDashboardStats, getUsers, updateUserRole, getTeacherStats, getAdminCourses };
+module.exports = {
+  getDashboardStats,
+  getUsers,
+  updateUserRole,
+  updateTeacherApproval,
+  getTeacherStats,
+  getAdminCourses,
+};

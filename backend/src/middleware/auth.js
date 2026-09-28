@@ -14,7 +14,7 @@ async function authenticate(req, res, next) {
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
-      select: { id: true, email: true, name: true, role: true, avatar: true },
+      select: { id: true, email: true, name: true, role: true, avatar: true, teacherApproved: true },
     });
 
     if (!user) {
@@ -44,6 +44,14 @@ function authorize(...roles) {
   };
 }
 
+/** Blocks disapproved teachers from creating content (admins always pass). */
+function requireApprovedTeacher(req, res, next) {
+  if (req.user?.role === 'TEACHER' && req.user.teacherApproved === false) {
+    return next(new AppError('Your teacher account has been disapproved by admin.', 403));
+  }
+  next();
+}
+
 async function optionalAuthenticate(req, res, next) {
   try {
     const authHeader = req.headers.authorization;
@@ -56,7 +64,7 @@ async function optionalAuthenticate(req, res, next) {
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
-      select: { id: true, email: true, name: true, role: true, avatar: true },
+      select: { id: true, email: true, name: true, role: true, avatar: true, teacherApproved: true },
     });
 
     if (user) req.user = user;
@@ -66,4 +74,4 @@ async function optionalAuthenticate(req, res, next) {
   next();
 }
 
-module.exports = { authenticate, authorize, optionalAuthenticate };
+module.exports = { authenticate, authorize, requireApprovedTeacher, optionalAuthenticate };

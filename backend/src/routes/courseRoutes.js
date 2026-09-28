@@ -9,7 +9,7 @@ const {
   getMyCourses,
   getInstructor,
 } = require('../controllers/courseController');
-const { authenticate, authorize, optionalAuthenticate } = require('../middleware/auth');
+const { authenticate, authorize, optionalAuthenticate, requireApprovedTeacher } = require('../middleware/auth');
 const { validate } = require('../middleware/validate');
 const {
   createCourseValidation,
@@ -22,9 +22,9 @@ router.get('/', getCourses);
 router.get('/instructor/:id', getInstructor);
 router.get('/my', authenticate, getMyCourses);
 router.get('/:id', optionalAuthenticate, getCourseById);
-router.post('/', authenticate, authorize('TEACHER', 'ADMIN'), createCourseValidation, validate, createCourse);
-router.put('/:id', authenticate, authorize('TEACHER', 'ADMIN'), updateCourseValidation, validate, updateCourse);
-router.delete('/:id', authenticate, authorize('TEACHER', 'ADMIN'), deleteCourse);
+router.post('/', authenticate, authorize('TEACHER', 'ADMIN'), requireApprovedTeacher, createCourseValidation, validate, createCourse);
+router.put('/:id', authenticate, authorize('TEACHER', 'ADMIN'), requireApprovedTeacher, updateCourseValidation, validate, updateCourse);
+router.delete('/:id', authenticate, authorize('TEACHER', 'ADMIN'), requireApprovedTeacher, deleteCourse);
 router.post('/:id/enroll', authenticate, enrollCourse);
 
 module.exports = router;

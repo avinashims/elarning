@@ -38,10 +38,21 @@ export default function AdminDashboard() {
 
   const handleRoleChange = async (userId, role) => {
     try {
-      await api.put(`/dashboard/admin/users/${userId}/role`, { role });
-      setUsers(users.map((u) => (u.id === userId ? { ...u, role } : u)));
+      const res = await api.put(`/dashboard/admin/users/${userId}/role`, { role });
+      const updated = res.data?.data;
+      setUsers(users.map((u) => (u.id === userId ? { ...u, ...updated } : u)));
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to update role');
+    }
+  };
+
+  const handleTeacherApproval = async (userId, approved) => {
+    try {
+      const res = await api.put(`/dashboard/admin/users/${userId}/teacher-approval`, { approved });
+      const updated = res.data?.data;
+      setUsers(users.map((u) => (u.id === userId ? { ...u, ...updated } : u)));
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to update teacher approval');
     }
   };
 
@@ -142,6 +153,7 @@ export default function AdminDashboard() {
               <th>Name</th>
               <th>Email</th>
               <th>Role</th>
+              <th>Teacher status</th>
               <th>Joined</th>
               <th>Actions</th>
             </tr>
@@ -152,8 +164,20 @@ export default function AdminDashboard() {
                 <td>{u.name}</td>
                 <td>{u.email}</td>
                 <td><span className={`badge badge-${u.role === 'ADMIN' ? 'danger' : u.role === 'TEACHER' ? 'warning' : 'primary'}`}>{u.role}</span></td>
+                <td>
+                  {u.role === 'TEACHER' ? (
+                    u.teacherApproved !== false ? (
+                      <span className="badge badge-success">Approved</span>
+                    ) : (
+                      <span className="badge badge-danger">Disapproved</span>
+                    )
+                  ) : (
+                    <span style={{ color: 'var(--text-muted)' }}>—</span>
+                  )}
+                </td>
                 <td>{new Date(u.createdAt).toLocaleDateString()}</td>
                 <td>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', alignItems: 'center' }}>
                   <select
                     value={u.role}
                     onChange={(e) => handleRoleChange(u.id, e.target.value)}
@@ -164,6 +188,18 @@ export default function AdminDashboard() {
                     <option value="TEACHER">Teacher</option>
                     <option value="ADMIN">Admin</option>
                   </select>
+                  {u.role === 'TEACHER' && (
+                    u.teacherApproved !== false ? (
+                      <button type="button" className="btn btn-sm btn-danger" onClick={() => handleTeacherApproval(u.id, false)}>
+                        Disapprove
+                      </button>
+                    ) : (
+                      <button type="button" className="btn btn-sm btn-primary" onClick={() => handleTeacherApproval(u.id, true)}>
+                        Approve
+                      </button>
+                    )
+                  )}
+                  </div>
                 </td>
               </tr>
             ))}
