@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import GoogleSignInButton from '../components/GoogleSignInButton';
+import PasswordInput from '../components/PasswordInput';
 import { getAuthErrorMessage } from '../utils/authErrorMessage';
 import './Auth.css';
 
@@ -66,13 +67,12 @@ export default function Login() {
             />
           </div>
           <div className="form-group">
-            <label>Password</label>
-            <input
-              type="password"
-              className="form-control"
+            <label htmlFor="login-password">Password</label>
+            <PasswordInput
+              id="login-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
+              autoComplete="current-password"
             />
           </div>
           <button type="submit" className="btn btn-primary btn-lg" style={{ width: '100%' }} disabled={loading}>

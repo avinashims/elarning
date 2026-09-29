@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import GoogleSignInButton from '../components/GoogleSignInButton';
+import PasswordInput from '../components/PasswordInput';
 import { getAuthErrorMessage } from '../utils/authErrorMessage';
 import './Auth.css';
 
@@ -63,8 +64,15 @@ export default function Register() {
             <input name="email" type="email" className="form-control" value={form.email} onChange={handleChange} required />
           </div>
           <div className="form-group">
-            <label>Password</label>
-            <input name="password" type="password" className="form-control" value={form.password} onChange={handleChange} required minLength={6} />
+            <label htmlFor="register-password">Password</label>
+            <PasswordInput
+              id="register-password"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              autoComplete="new-password"
+              minLength={6}
+            />
           </div>
           <div className="form-group">
             <label>I am a</label>
