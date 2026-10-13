@@ -60,8 +60,9 @@ Repo → **Settings** → **Secrets and variables** → **Actions** → **New re
 |--------|--------|
 | `DROPLET_HOST` | `165.22.209.200` |
 | `DROPLET_USER` | `root` |
-| `DROPLET_PATH` | `/opt/elarning` |
 | `DROPLET_SSH_KEY` | **Full private key** (`-----BEGIN OPENSSH PRIVATE KEY-----` …) |
+
+The workflow `cd`s to **`/opt/elarning`** on the droplet (note the spelling). Do not set a path secret to `optelarning` without the leading `/`.
 
 Generate the key **without** a passphrase (`-N ""`) so Actions can use it.
 

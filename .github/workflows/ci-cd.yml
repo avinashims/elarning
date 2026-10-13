@@ -56,7 +56,7 @@ jobs:
           command_timeout: 15m
           script: |
             set -e
-            cd ${{ secrets.DROPLET_PATH }}
+            cd /opt/elarning
             git fetch origin
             git reset --hard origin/main
             git log -1 --oneline
