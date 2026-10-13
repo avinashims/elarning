@@ -239,6 +239,24 @@ docker network ls
 
 ---
 
+## CI/CD (GitHub Actions)
+
+After tests pass, a push to `main` can SSH to the droplet and run `deploy/deploy-shared.sh`.
+
+**[deploy/CICD.md](deploy/CICD.md)** — GitHub secrets, SSH key, and how to enable it.
+
+---
+
+## Database replica (copy of `elearning`)
+
+Full process (snapshot vs automatic logical replication, verify, pgAdmin, schema changes):
+
+**[deploy/DATABASE_REPLICA.md](deploy/DATABASE_REPLICA.md)**
+
+Live names: primary `elearning`, replica `elearning_replica`, container `hotelbooking-postgres-1`. Keep API `DATABASE_URL` on **`elearning`**.
+
+---
+
 ## Useful commands
 
 ```bash

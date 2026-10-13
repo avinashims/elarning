@@ -1,0 +1,63 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Backend install and Prisma
+        working-directory: backend
+        run: |
+          npm ci
+          npx prisma generate
+
+      - name: Backend tests
+        working-directory: backend
+        run: npm test
+
+      - name: Frontend install and build
+        working-directory: frontend
+        env:
+          VITE_API_URL: /api
+        run: |
+          npm ci
+          npm run build
+
+  deploy:
+    name: Deploy to DigitalOcean
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          script_stop: true
+          command_timeout: 15m
+          script: |
+            set -e
+            cd ${{ secrets.DROPLET_PATH }}
+            git fetch origin
+            git reset --hard origin/main
+            git log -1 --oneline
+            bash deploy/deploy-shared.sh
