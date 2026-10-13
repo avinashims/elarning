@@ -21,14 +21,24 @@ set +a
 echo "Building and starting API (port ${APP_PORT:-9001}) + Web (port ${WEB_PORT:-9002})..."
 docker compose -f "$COMPOSE_FILE" up -d --build
 
-sleep 10
+echo "Waiting for API health (prisma db push can take a minute)..."
+HEALTH_OK=0
+for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
+  if curl -sf "http://127.0.0.1:${APP_PORT:-9001}/api/health" >/dev/null; then
+    curl -sf "http://127.0.0.1:${APP_PORT:-9001}/api/health"
+    echo ""
+    HEALTH_OK=1
+    break
+  fi
+  echo "  attempt $i/12 — not ready yet"
+  sleep 5
+done
 
-echo "Checking API health..."
-curl -sf "http://127.0.0.1:${APP_PORT:-9001}/api/health" && echo "" || {
+if [ "$HEALTH_OK" != 1 ]; then
   echo "API health check failed. Logs:"
   docker compose -f "$COMPOSE_FILE" logs --tail=50 api
   exit 1
-}
+fi
 
 echo "Checking web UI..."
 curl -sf "http://127.0.0.1:${WEB_PORT:-9002}/" >/dev/null && echo "Web OK" || {
