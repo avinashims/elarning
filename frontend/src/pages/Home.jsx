@@ -48,7 +48,7 @@ export default function Home() {
       <section className="hero hero-pw">
         <div className="container hero-grid">
           <div className="hero-content">
-            <p className="hero-kicker">Live-first exam prep</p>
+            <p className="hero-kicker">Live-first exam preparation</p>
             <h1>Crack your exam with Avi SkillStream</h1>
             <p>
               Join live batches, test series, and coding programs — JEE, NEET, MERN, PHP, WordPress, and more.
